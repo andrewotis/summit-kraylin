@@ -1,0 +1,17 @@
+services:
+    vite:
+        image: node:23
+        container_name: krayin-crm-vite
+        ports:
+            - "${VITE_PORT:-5173}:5173"
+        working_dir: /var/www/html
+        volumes:
+            - .:/var/www/html
+            - /var/www/html/node_modules
+        command: sh -c "npm install && npm run dev"
+        networks:
+            - krayin
+
+networks:
+    krayin:
+        name: laravel-crm_krayin

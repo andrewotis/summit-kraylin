@@ -6,8 +6,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 use Webkul\Admin\Http\Controllers\Controller;
+use Webkul\Core\Models\AuditLog;
 
 class AccountController extends Controller
 {
@@ -35,8 +37,8 @@ class AccountController extends Controller
         $this->validate(request(), [
             'name' => 'required',
             'email' => 'email|unique:users,email,'.$user->id,
-            'password' => 'nullable|min:6|confirmed',
-            'current_password' => 'required|min:6',
+            'password' => ['nullable', 'confirmed', Password::min(12)->mixedCase()->symbols()->numbers()->uncompromised()],
+            'current_password' => 'required',
             'image.*' => 'nullable|mimes:bmp,jpeg,jpg,png,webp',
         ]);
 
@@ -89,6 +91,16 @@ class AccountController extends Controller
 
         if ($isPasswordChanged) {
             Event::dispatch('user.account.update-password', $user);
+
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'password_change',
+                'entity_type' => 'users',
+                'entity_id' => $user->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'payload' => null,
+            ]);
         }
 
         session()->flash('success', trans('admin::app.account.edit.update-success'));

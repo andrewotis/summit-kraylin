@@ -34,25 +34,17 @@
             </div>
 
             <div class="grid w-full">
-                <!-- Country Field -->
+                <!-- Country Field (always USA) -->
                 <x-admin::form.control-group>
-                    <x-admin::form.control-group.control
-                        type="select"
+                    <input
+                        type="hidden"
                         ::name="attribute['code'] + '[country]'"
-                        ::rules="attribute.is_required ? 'required|' + validations : validations"
-                        :label="trans('admin::app.common.custom-attributes.country')"
-                        v-model="country"
-                    >
-                        <option value="">@lang('admin::app.common.custom-attributes.select-country')</option>
-                        
-                        @foreach (core()->countries() as $country)
-                            <option value="{{ $country->code }}">{{ $country->name }}</option>
-                        @endforeach
-                    </x-admin::form.control-group.control>
+                        value="US"
+                    />
 
-                    <x-admin::form.control-group.error ::name="attribute['code'] + '[country]'" />
+                    <x-admin::form.control-group.label>@lang('admin::app.common.custom-attributes.country')</x-admin::form.control-group.label>
 
-                    <x-admin::form.control-group.error ::name="attribute['code'] + '.country'" />
+                    <p class="text-gray-600 dark:text-gray-300 font-medium">United States</p>
                 </x-admin::form.control-group>
 
                 <!-- State Field -->
@@ -142,9 +134,9 @@
 
             data() {
                 return {
-                    country: this.data?.country || '',
+                    country: 'US',
 
-                    state: this.data?.state || '',
+                    state: this.data?.state || 'MD',
 
                     countryStates: @json(core()->groupedStatesByCountries()),
                 };

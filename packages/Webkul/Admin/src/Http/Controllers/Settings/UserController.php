@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Webkul\Admin\DataGrids\Settings\UserDataGrid;
@@ -56,7 +57,7 @@ class UserController extends Controller
         $this->validate(request(), [
             'email' => 'required|email|unique:users,email',
             'name' => 'required',
-            'password' => 'nullable',
+            'password' => ['nullable', Password::min(12)->mixedCase()->symbols()->numbers()->uncompromised()],
             'confirm_password' => 'nullable|required_with:password|same:password',
             'role_id' => 'required',
             'status' => 'boolean|in:0,1',
@@ -112,7 +113,7 @@ class UserController extends Controller
         $this->validate(request(), [
             'email' => 'required|email|unique:users,email,'.$id,
             'name' => 'required|string',
-            'password' => 'nullable|string|min:6',
+            'password' => ['nullable', 'string', Password::min(12)->mixedCase()->symbols()->numbers()->uncompromised()],
             'confirm_password' => 'nullable|required_with:password|same:password',
             'role_id' => 'required|integer|exists:roles,id',
             'status' => 'nullable|boolean|in:0,1',

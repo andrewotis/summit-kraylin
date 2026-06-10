@@ -301,6 +301,18 @@ Breadcrumbs::for('settings.marketing.campaigns', function (BreadcrumbTrail $trai
     $trail->push(trans('admin::app.settings.marketing.campaigns.index.title'), route('admin.settings.marketing.campaigns.index'));
 });
 
+// Settings > Mailing Lists
+Breadcrumbs::for('settings.mailing_lists', function (BreadcrumbTrail $trail) {
+    $trail->parent('settings');
+    $trail->push(trans('admin::app.settings.mailing-lists.index.title'), route('admin.settings.mailing_lists.index'));
+});
+
+// Settings > Mailing Lists > Subscribers
+Breadcrumbs::for('settings.mailing_lists.subscribers', function (BreadcrumbTrail $trail, $mailingList) {
+    $trail->parent('settings.mailing_lists');
+    $trail->push($mailingList->name, route('admin.settings.mailing_lists.subscribers.index', $mailingList->id));
+});
+
 // Settings > Workflows
 Breadcrumbs::for('settings.workflows', function (BreadcrumbTrail $trail) {
     $trail->parent('settings');

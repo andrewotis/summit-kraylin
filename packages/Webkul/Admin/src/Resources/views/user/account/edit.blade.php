@@ -138,7 +138,7 @@
                             <x-admin::form.control-group.control
                                 type="password"
                                 name="current_password"
-                                rules="required|min:6"
+                                rules="required|min:12"
                                 :label="trans('admin::app.account.edit.current-password')"
                                 :placeholder="trans('admin::app.account.edit.current-password')"
                             />
@@ -159,7 +159,7 @@
                             <x-admin::form.control-group.control
                                 type="password"
                                 name="password"
-                                rules="min:6"
+                                rules="min:12"
                                 :placeholder="trans('admin::app.account.edit.password')"
                                 ref="password"
                             />
@@ -191,6 +191,36 @@
                         {!! view_render_event('admin.user.confirm-password.after', ['user' => $user]) !!}
                     </x-slot>
                 </x-admin::accordion>
+
+                <div class="box-shadow mt-4 rounded bg-white p-4 dark:bg-gray-900">
+                    <p class="mb-4 text-base font-semibold text-gray-800 dark:text-white">
+                        @lang('admin::app.user.two-factor.setup-title')
+                    </p>
+
+                    @if ($user->two_factor_confirmed_at)
+                        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                            &#x2705; @lang('admin::app.user.two-factor.setup-heading')
+                        </p>
+
+                        <a
+                            href="{{ route('admin.two-factor.setup') }}"
+                            class="secondary-button"
+                        >
+                            @lang('admin::app.user.two-factor.recovery-codes-title')
+                        </a>
+                    @else
+                        <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                            @lang('admin::app.user.two-factor.setup-instruction')
+                        </p>
+
+                        <a
+                            href="{{ route('admin.two-factor.setup') }}"
+                            class="primary-button"
+                        >
+                            @lang('admin::app.user.two-factor.enable')
+                        </a>
+                    @endif
+                </div>
             </div>
 
             {!! view_render_event('admin.user.account.right.after', ['user' => $user]) !!}

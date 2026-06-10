@@ -21,6 +21,8 @@ use Webkul\Admin\Http\Controllers\Settings\Warehouse\WarehouseController;
 use Webkul\Admin\Http\Controllers\Settings\WebFormController;
 use Webkul\Admin\Http\Controllers\Settings\WebhookController;
 use Webkul\Admin\Http\Controllers\Settings\WorkflowController;
+use Webkul\Admin\Http\Controllers\Settings\MailingListController;
+use Webkul\Admin\Http\Controllers\Settings\SubscriberController;
 
 /**
  * Settings group routes.
@@ -335,6 +337,40 @@ Route::prefix('settings')->group(function () {
             Route::delete('{id}', 'destroy')->name('admin.settings.marketing.campaigns.delete');
 
             Route::post('mass-destroy', 'massDestroy')->name('admin.settings.marketing.campaigns.mass_delete');
+        });
+    });
+
+    /**
+     * Mailing Lists Routes.
+     */
+    Route::controller(MailingListController::class)->prefix('mailing-lists')->group(function () {
+        Route::get('', 'index')->name('admin.settings.mailing_lists.index');
+
+        Route::post('create', 'store')->name('admin.settings.mailing_lists.store');
+
+        Route::get('edit/{id}', 'edit')->name('admin.settings.mailing_lists.edit');
+
+        Route::put('edit/{id}', 'update')->name('admin.settings.mailing_lists.update');
+
+        Route::delete('{id}', 'destroy')->name('admin.settings.mailing_lists.delete');
+
+        Route::post('mass-destroy', 'massDestroy')->name('admin.settings.mailing_lists.mass_delete');
+
+        /**
+         * Subscribers Routes.
+         */
+        Route::controller(SubscriberController::class)->prefix('{id}/subscribers')->group(function () {
+            Route::get('', 'index')->name('admin.settings.mailing_lists.subscribers.index');
+
+            Route::post('create', 'store')->name('admin.settings.mailing_lists.subscribers.store');
+
+            Route::get('edit/{subscriberId}', 'edit')->name('admin.settings.mailing_lists.subscribers.edit');
+
+            Route::put('edit/{subscriberId}', 'update')->name('admin.settings.mailing_lists.subscribers.update');
+
+            Route::delete('{subscriberId}', 'destroy')->name('admin.settings.mailing_lists.subscribers.delete');
+
+            Route::post('mass-destroy', 'massDestroy')->name('admin.settings.mailing_lists.subscribers.mass_delete');
         });
     });
 

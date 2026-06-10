@@ -5,6 +5,7 @@ namespace Webkul\Activity\Models;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Activity\Contracts\Activity as ActivityContract;
 use Webkul\Contact\Models\PersonProxy;
+use Webkul\Core\Traits\Auditable;
 use Webkul\Lead\Models\LeadProxy;
 use Webkul\Product\Models\ProductProxy;
 use Webkul\User\Models\UserProxy;
@@ -12,6 +13,8 @@ use Webkul\Warehouse\Models\WarehouseProxy;
 
 class Activity extends Model implements ActivityContract
 {
+    use Auditable;
+
     /**
      * Define table name of property
      *
@@ -32,6 +35,10 @@ class Activity extends Model implements ActivityContract
      * @var array
      */
     protected $casts = [
+        'title' => 'encrypted',
+        'location' => 'encrypted',
+        'comment' => 'encrypted',
+        'additional' => 'encrypted',
         'schedule_from' => 'datetime',
         'schedule_to' => 'datetime',
     ];

@@ -11,8 +11,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\View\View;
 use Webkul\Admin\Http\Controllers\Controller;
+use Webkul\Core\Models\AuditLog;
 
 class ResetPasswordController extends Controller
 {
@@ -45,7 +47,7 @@ class ResetPasswordController extends Controller
             $this->validate(request(), [
                 'token' => 'required',
                 'email' => 'required|email',
-                'password' => 'required|confirmed|min:6',
+                'password' => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->symbols()->numbers()->uncompromised()],
             ]);
 
             $response = $this->broker()->reset(
@@ -84,6 +86,16 @@ class ResetPasswordController extends Controller
         $admin->setRememberToken(Str::random(60));
 
         $admin->save();
+
+        AuditLog::create([
+            'user_id' => $admin->id,
+            'action' => 'password_reset',
+            'entity_type' => 'users',
+            'entity_id' => $admin->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'payload' => null,
+        ]);
 
         event(new PasswordReset($admin));
 

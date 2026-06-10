@@ -5,10 +5,11 @@ namespace Webkul\Attribute\Models;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Activity\Traits\LogsActivity;
 use Webkul\Attribute\Contracts\AttributeValue as AttributeValueContract;
+use Webkul\Core\Traits\Auditable;
 
 class AttributeValue extends Model implements AttributeValueContract
 {
-    use LogsActivity;
+    use Auditable, LogsActivity;
 
     /**
      * Disable the default timestamps.
@@ -23,7 +24,8 @@ class AttributeValue extends Model implements AttributeValueContract
      * @var array
      */
     protected $casts = [
-        'json_value' => 'array',
+        'text_value' => 'encrypted',
+        'json_value' => 'encrypted:array',
     ];
 
     /**

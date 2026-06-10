@@ -11,6 +11,7 @@ use Webkul\Activity\Models\ActivityProxy;
 use Webkul\Activity\Traits\LogsActivity;
 use Webkul\Attribute\Traits\CustomAttribute;
 use Webkul\Contact\Models\PersonProxy;
+use Webkul\Core\Traits\Auditable;
 use Webkul\Email\Models\EmailProxy;
 use Webkul\Lead\Contracts\Lead as LeadContract;
 use Webkul\Quote\Models\QuoteProxy;
@@ -19,7 +20,7 @@ use Webkul\User\Models\UserProxy;
 
 class Lead extends Model implements LeadContract
 {
-    use CustomAttribute, LogsActivity;
+    use Auditable, CustomAttribute, LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -48,6 +49,8 @@ class Lead extends Model implements LeadContract
      * @var array
      */
     protected $casts = [
+        'title' => 'encrypted',
+        'description' => 'encrypted',
         'closed_at' => 'datetime:D M d, Y H:i A',
         'expected_close_date' => 'date:D M d, Y',
     ];

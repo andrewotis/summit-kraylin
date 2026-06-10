@@ -76,7 +76,7 @@ class Core
      */
     public function countries()
     {
-        return $this->countryRepository->all();
+        return $this->countryRepository->findWhere(['code' => 'US']);
     }
 
     /**
@@ -118,7 +118,7 @@ class Core
     {
         $collection = [];
 
-        foreach ($this->countryStateRepository->all() as $state) {
+        foreach ($this->countryStateRepository->findByField('country_code', 'US') as $state) {
             $collection[$state->country_code][] = $state->toArray();
         }
 

@@ -6,14 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Attribute\Traits\CustomAttribute;
 use Webkul\Contact\Contracts\Organization as OrganizationContract;
+use Webkul\Core\Traits\Auditable;
 use Webkul\User\Models\UserProxy;
 
 class Organization extends Model implements OrganizationContract
 {
-    use CustomAttribute;
+    use Auditable, CustomAttribute;
 
     protected $casts = [
-        'address' => 'array',
+        'name' => 'encrypted',
+        'address' => 'encrypted:array',
     ];
 
     /**

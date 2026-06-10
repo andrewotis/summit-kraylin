@@ -26,6 +26,12 @@ class User extends Authenticatable implements UserContract
         'role_id',
         'status',
         'view_permission',
+        'google2fa_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+        'emergency_token',
+        'emergency_token_expires_at',
+        'emergency_granted_by',
     ];
 
     /**
@@ -36,8 +42,25 @@ class User extends Authenticatable implements UserContract
     protected $hidden = [
         'password',
         'api_token',
+        'emergency_token',
+        'google2fa_secret',
+        'two_factor_recovery_codes',
         'remember_token',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'google2fa_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted',
+            'emergency_token' => 'encrypted',
+            'emergency_token_expires_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get image url for the product image.

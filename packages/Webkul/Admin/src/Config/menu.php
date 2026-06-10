@@ -275,6 +275,13 @@ return [
         'route' => 'admin.settings.tags.index',
         'sort' => 1,
         'icon-class' => 'icon-settings-tag',
+    ], [
+        'key' => 'settings.other_settings.mailing_lists',
+        'name' => 'admin::app.layouts.mailing-lists',
+        'info' => 'admin::app.layouts.mailing-lists-info',
+        'route' => 'admin.settings.mailing_lists.index',
+        'sort' => 2,
+        'icon-class' => 'icon-settings-mail',
     ],
 
     /**

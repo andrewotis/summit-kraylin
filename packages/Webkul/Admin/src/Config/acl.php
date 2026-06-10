@@ -572,6 +572,51 @@ return [
         'route' => ['admin.settings.tags.delete', 'admin.settings.tags.mass_delete', 'admin.leads.tags.detach'],
         'sort' => 2,
     ], [
+        'key' => 'settings.other_settings.emergency_access',
+        'name' => 'admin::app.acl.emergency-access',
+        'route' => ['admin.emergency.grant.form', 'admin.emergency.grant'],
+        'sort' => 3,
+    ], [
+        'key' => 'settings.other_settings.mailing_lists',
+        'name' => 'admin::app.acl.mailing-lists',
+        'route' => 'admin.settings.mailing_lists.index',
+        'sort' => 4,
+    ], [
+        'key' => 'settings.other_settings.mailing_lists.create',
+        'name' => 'admin::app.acl.create',
+        'route' => ['admin.settings.mailing_lists.create', 'admin.settings.mailing_lists.store'],
+        'sort' => 1,
+    ], [
+        'key' => 'settings.other_settings.mailing_lists.edit',
+        'name' => 'admin::app.acl.edit',
+        'route' => ['admin.settings.mailing_lists.edit', 'admin.settings.mailing_lists.update'],
+        'sort' => 2,
+    ], [
+        'key' => 'settings.other_settings.mailing_lists.delete',
+        'name' => 'admin::app.acl.delete',
+        'route' => ['admin.settings.mailing_lists.delete', 'admin.settings.mailing_lists.mass_delete'],
+        'sort' => 3,
+    ], [
+        'key' => 'settings.other_settings.mailing_lists.subscribers',
+        'name' => 'admin::app.acl.subscribers',
+        'route' => 'admin.settings.mailing_lists.subscribers.index',
+        'sort' => 4,
+    ], [
+        'key' => 'settings.other_settings.mailing_lists.subscribers.create',
+        'name' => 'admin::app.acl.create',
+        'route' => ['admin.settings.mailing_lists.subscribers.create', 'admin.settings.mailing_lists.subscribers.store'],
+        'sort' => 1,
+    ], [
+        'key' => 'settings.other_settings.mailing_lists.subscribers.edit',
+        'name' => 'admin::app.acl.edit',
+        'route' => ['admin.settings.mailing_lists.subscribers.edit', 'admin.settings.mailing_lists.subscribers.update'],
+        'sort' => 2,
+    ], [
+        'key' => 'settings.other_settings.mailing_lists.subscribers.delete',
+        'name' => 'admin::app.acl.delete',
+        'route' => ['admin.settings.mailing_lists.subscribers.delete', 'admin.settings.mailing_lists.subscribers.mass_delete'],
+        'sort' => 3,
+    ], [
         'key' => 'configuration',
         'name' => 'admin::app.acl.configuration',
         'route' => 'admin.configuration.index',

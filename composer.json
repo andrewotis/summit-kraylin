@@ -22,6 +22,7 @@
         "league/fractal": "^0.21.0",
         "maatwebsite/excel": "^3.1",
         "mpdf/mpdf": "^8.2",
+        "pragmarx/google2fa-laravel": "^3.0",
         "prettus/l5-repository": "^3.0",
         "smalot/pdfparser": "^2.11",
         "webklex/laravel-imap": "^6.0"
@@ -78,6 +79,7 @@
             "Webkul\\User\\": "packages/Webkul/User/src",
             "Webkul\\Warehouse\\": "packages/Webkul/Warehouse/src",
             "Webkul\\WebForm\\": "packages/Webkul/WebForm/src",
+            "Webkul\\MailingList\\": "packages/Webkul/MailingList/src",
             "Webkul\\Automation\\": "packages/Webkul/Automation/src"
         }
     },

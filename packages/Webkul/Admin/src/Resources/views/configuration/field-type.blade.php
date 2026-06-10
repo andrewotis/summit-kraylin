@@ -299,31 +299,20 @@
             </template>
 
             <template v-if="field.type == 'country' && field.is_visible">
-                <v-country :selected-country="value">
-                    <template v-slot:default="{ changeCountry }">
-                        <x-admin::form.control-group class="flex">
-                            <x-admin::form.control-group.control
-                                type="select"
-                                ::id="name"
-                                ::name="name"
-                                ::rules="validations"
-                                ::value="value"
-                                ::label="label"
-                                @change="changeCountry($event.target.value)"
-                            >
-                                <option value="">
-                                    @lang('admin::app.configuration.index.select-country')
-                                </option>
-        
-                                @foreach (core()->countries() as $country)
-                                    <option value="{{ $country->code }}">
-                                        {{ $country->name }}
-                                    </option>
-                                @endforeach
-                            </x-admin::form.control-group.control>
-                        </x-admin::form.control-group>
-                    </template>
-                </v-country>
+                <x-admin::form.control-group class="flex">
+                    <input
+                        type="hidden"
+                        ::id="name"
+                        ::name="name"
+                        value="US"
+                    />
+
+                    <x-admin::form.control-group.label ::for="name">
+                        @{{ label }}
+                    </x-admin::form.control-group.label>
+
+                    <p class="text-gray-600 dark:text-gray-300 font-medium">United States</p>
+                </x-admin::form.control-group>
             </template>
         
             <!-- State select Vue component -->

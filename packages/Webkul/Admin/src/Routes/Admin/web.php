@@ -54,3 +54,8 @@ require 'help-routes.php';
  * Rest routes.
  */
 require 'rest-routes.php';
+
+/**
+ * Two-factor authentication routes.
+ */
+require 'two-factor-routes.php';

@@ -12,13 +12,15 @@ use Webkul\Activity\Traits\LogsActivity;
 use Webkul\Attribute\Traits\CustomAttribute;
 use Webkul\Contact\Contracts\Person as PersonContract;
 use Webkul\Contact\Database\Factories\PersonFactory;
+use Webkul\Core\Traits\Auditable;
 use Webkul\Lead\Models\LeadProxy;
+use Webkul\MailingList\Models\SubscriberProxy;
 use Webkul\Tag\Models\TagProxy;
 use Webkul\User\Models\UserProxy;
 
 class Person extends Model implements PersonContract
 {
-    use CustomAttribute, HasFactory, LogsActivity;
+    use Auditable, CustomAttribute, HasFactory, LogsActivity;
 
     /**
      * Table name.
@@ -40,8 +42,9 @@ class Person extends Model implements PersonContract
      * @var array
      */
     protected $casts = [
-        'emails' => 'array',
-        'contact_numbers' => 'array',
+        'name' => 'encrypted',
+        'emails' => 'encrypted:array',
+        'contact_numbers' => 'encrypted:array',
     ];
 
     /**
@@ -97,6 +100,14 @@ class Person extends Model implements PersonContract
     public function leads(): HasMany
     {
         return $this->hasMany(LeadProxy::modelClass(), 'person_id');
+    }
+
+    /**
+     * Get the mailing list subscriptions for the person.
+     */
+    public function subscribers(): HasMany
+    {
+        return $this->hasMany(SubscriberProxy::modelClass(), 'person_id');
     }
 
     /**

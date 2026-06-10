@@ -30,14 +30,14 @@
                     :style="{ 'text-align': position }"
                 >
                     <span class="cursor-pointer truncate rounded">
-                        @{{ valueLabel ? valueLabel : `${inputValue?.address} ${inputValue?.city} ${inputValue?.state} ${inputValue?.postcode} ${inputValue?.country}`.length > 20 ? `${inputValue?.address} ${inputValue?.city} ${inputValue?.state} ${inputValue?.postcode} ${inputValue?.country}`.substring(0, 20) + '...' : `${inputValue?.address} ${inputValue?.city} ${inputValue?.state} ${inputValue?.postcode} ${inputValue?.country}` }}
+                        @{{ valueLabel ? valueLabel : `${inputValue?.address} ${inputValue?.city} ${inputValue?.state} ${inputValue?.postcode}`.length > 20 ? `${inputValue?.address} ${inputValue?.city} ${inputValue?.state} ${inputValue?.postcode}`.substring(0, 20) + '...' : `${inputValue?.address} ${inputValue?.city} ${inputValue?.state} ${inputValue?.postcode}` }}
                     </span>
 
                     <div class="absolute bottom-0 mb-5 hidden flex-col group-hover:flex">
                         <span class="whitespace-no-wrap relative z-10 rounded-md bg-black px-4 py-2 text-xs leading-none text-white shadow-lg dark:bg-white dark:text-gray-900">
                             @{{ inputValue?.address }}<br>
                             @{{ `${inputValue?.city}, ${inputValue?.state}, ${inputValue?.postcode}` }}<br>
-                            @{{ `${inputValue?.country}` }}<br>
+                            United States<br>
                         </span>
 
                         <div class="-mt-2 ml-4 h-3 w-3 rotate-45 bg-black dark:bg-white"></div>
@@ -86,22 +86,19 @@
                                     </div>
 
                                     <div class="grid w-full">
-                                        <!-- Country Field -->
+                                        <!-- Country Field (always USA) -->
                                         <x-admin::form.control-group>
-                                            <x-admin::form.control-group.control
-                                                type="select"
+                                            <input
+                                                type="hidden"
                                                 ::name="`${name}.country`"
-                                                v-model="inputValue.country"
-                                            >
-                                                <option value="">@lang('admin::app.common.custom-attributes.select-country')</option>
-                                                
-                                                @foreach (core()->countries() as $country)
-                                                    <option value="{{ $country->code }}">{{ $country->name }}</option>
-                                                @endforeach
-                                            </x-admin::form.control-group.control>
-                        
-                                            <x-admin::form.control-group.error name="country" />
-                        
+                                                value="US"
+                                            />
+
+                                            <x-admin::form.control-group.label>
+                                                @lang('admin::app.common.custom-attributes.country')
+                                            </x-admin::form.control-group.label>
+
+                                            <p class="text-gray-600 dark:text-gray-300 font-medium">United States</p>
                                         </x-admin::form.control-group>
                         
                                         <!-- State Field -->
@@ -238,7 +235,7 @@
 
             data() {
                 return {
-                    inputValue: this.value,
+                    inputValue: this.value ? { ...this.value, country: this.value?.country || 'US', state: this.value?.state || 'MD' } : { country: 'US', state: 'MD' },
 
                     isEditing: false,
 

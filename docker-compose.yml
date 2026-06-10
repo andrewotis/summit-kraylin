@@ -1,0 +1,30 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                WWWUSER: ${WWWUSER:-1000}
+                WWWGROUP: ${WWWGROUP:-1000}
+        image: sail-8.5/app
+        container_name: krayin-crm-app
+        network_mode: host
+        environment:
+            WWWUSER: ${WWWUSER:-1000}
+        volumes:
+            - .:/var/www/html
+
+    nginx:
+        image: nginx:alpine
+        container_name: krayin-crm-nginx
+        network_mode: host
+        volumes:
+            - .:/var/www/html
+            - ./docker/nginx:/etc/nginx/conf.d
+        depends_on:
+            - app
+
+    mailpit:
+        image: axllent/mailpit
+        container_name: krayin-crm-mailpit
+        network_mode: host

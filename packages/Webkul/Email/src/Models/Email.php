@@ -4,12 +4,15 @@ namespace Webkul\Email\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Contact\Models\PersonProxy;
+use Webkul\Core\Traits\Auditable;
 use Webkul\Email\Contracts\Email as EmailContract;
 use Webkul\Lead\Models\LeadProxy;
 use Webkul\Tag\Models\TagProxy;
 
 class Email extends Model implements EmailContract
 {
+    use Auditable;
+
     /**
      * The table associated with the model.
      *
@@ -23,13 +26,16 @@ class Email extends Model implements EmailContract
      * @var array
      */
     protected $casts = [
+        'subject' => 'encrypted',
+        'name' => 'encrypted',
+        'reply' => 'encrypted',
         'folders' => 'array',
-        'sender' => 'array',
-        'from' => 'array',
-        'reply_to' => 'array',
-        'cc' => 'array',
-        'bcc' => 'array',
-        'reference_ids' => 'array',
+        'sender' => 'encrypted:array',
+        'from' => 'encrypted:array',
+        'reply_to' => 'encrypted:array',
+        'cc' => 'encrypted:array',
+        'bcc' => 'encrypted:array',
+        'reference_ids' => 'encrypted:array',
     ];
 
     /**

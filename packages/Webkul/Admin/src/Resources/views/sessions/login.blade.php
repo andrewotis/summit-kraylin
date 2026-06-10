@@ -61,7 +61,7 @@
                                 class="w-[254px] max-w-full ltr:pr-10 rtl:pl-10"
                                 id="password"
                                 name="password"
-                                rules="required|min:6"
+                                rules="required|min:12"
                                 :label="trans('admin::app.users.login.password')"
                                 :placeholder="trans('admin::app.users.login.password')"
                             />
@@ -81,12 +81,21 @@
 
                     <div class="flex items-center justify-between p-4">
                         <!-- Forgot Password Link -->
-                        <a
-                            class="cursor-pointer text-xs font-semibold leading-6 text-brandColor"
-                            href="{{ route('admin.forgot_password.create') }}"
-                        >
-                            @lang('admin::app.users.login.forget-password-link')
-                        </a>
+                        <div class="flex flex-col gap-1">
+                            <a
+                                class="cursor-pointer text-xs font-semibold leading-6 text-brandColor"
+                                href="{{ route('admin.forgot_password.create') }}"
+                            >
+                                @lang('admin::app.users.login.forget-password-link')
+                            </a>
+
+                            <a
+                                class="cursor-pointer text-xs font-semibold leading-6 text-brandColor"
+                                href="{{ route('admin.emergency.access.form') }}"
+                            >
+                                @lang('admin::app.users.emergency.login-link')
+                            </a>
+                        </div>
 
                         <!-- Submit Button -->
                         <button

@@ -330,7 +330,7 @@ abstract class AbstractImporter
 
                 $validations = [
                     $attribute->code.'.address' => 'required',
-                    $attribute->code.'.country' => 'required',
+                    $attribute->code.'.country' => 'nullable',
                     $attribute->code.'.state' => 'required',
                     $attribute->code.'.city' => 'required',
                     $attribute->code.'.postcode' => 'required',

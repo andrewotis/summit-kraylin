@@ -5,19 +5,22 @@ namespace Webkul\Quote\Models;
 use Illuminate\Database\Eloquent\Model;
 use Webkul\Attribute\Traits\CustomAttribute;
 use Webkul\Contact\Models\PersonProxy;
+use Webkul\Core\Traits\Auditable;
 use Webkul\Lead\Models\LeadProxy;
 use Webkul\Quote\Contracts\Quote as QuoteContract;
 use Webkul\User\Models\UserProxy;
 
 class Quote extends Model implements QuoteContract
 {
-    use CustomAttribute;
+    use Auditable, CustomAttribute;
 
     protected $table = 'quotes';
 
     protected $casts = [
-        'billing_address' => 'array',
-        'shipping_address' => 'array',
+        'subject' => 'encrypted',
+        'description' => 'encrypted',
+        'billing_address' => 'encrypted:array',
+        'shipping_address' => 'encrypted:array',
         'expired_at' => 'datetime',
     ];
 

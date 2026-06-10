@@ -11,9 +11,15 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Webkul\Admin\Bouncer;
 use Webkul\Admin\Exceptions\Handler;
+use Webkul\Admin\Http\Controllers\User\EmergencyAccessController;
 use Webkul\Admin\Http\Middleware\Bouncer as BouncerMiddleware;
+use Webkul\Admin\Http\Middleware\ForceTls;
+use Webkul\Admin\Http\Middleware\IdleTimeout;
 use Webkul\Admin\Http\Middleware\Locale;
+use Webkul\Admin\Http\Middleware\MaxSessionLifetime;
+use Webkul\Admin\Http\Middleware\RequiresTwoFactor;
 use Webkul\Admin\Http\Middleware\SanitizeUrl;
+use Webkul\Admin\Http\Middleware\SecurityHeaders;
 use Webkul\Contact\Models\Organization;
 use Webkul\Contact\Models\Person;
 use Webkul\Lead\Models\Lead;
@@ -34,11 +40,35 @@ class AdminServiceProvider extends ServiceProvider
 
         $router->aliasMiddleware('sanitize_url', SanitizeUrl::class);
 
+        $router->aliasMiddleware('two-factor', RequiresTwoFactor::class);
+
+        $router->aliasMiddleware('idle-timeout', IdleTimeout::class);
+
+        $router->aliasMiddleware('force-tls', ForceTls::class);
+
+        $router->aliasMiddleware('max-session-lifetime', MaxSessionLifetime::class);
+
+        $router->aliasMiddleware('security-headers', SecurityHeaders::class);
+
         include __DIR__.'/../Http/helpers.php';
 
-        Route::middleware(['web', 'admin_locale', 'user'])
+        Route::middleware(['web', 'admin_locale', 'force-tls', 'security-headers', 'user', 'max-session-lifetime', 'idle-timeout', 'two-factor'])
             ->prefix(config('app.admin_path'))
             ->group(__DIR__.'/../Routes/Admin/web.php');
+
+        Route::middleware(['web', 'admin_locale', 'security-headers', 'user'])
+            ->prefix(config('app.admin_path'))
+            ->group(function () {
+                Route::get('emergency/grant', [EmergencyAccessController::class, 'grantForm'])->name('admin.emergency.grant.form');
+                Route::post('emergency/grant', [EmergencyAccessController::class, 'grant'])->name('admin.emergency.grant');
+            });
+
+        Route::middleware(['web', 'admin_locale', 'security-headers'])
+            ->prefix(config('app.admin_path'))
+            ->group(function () {
+                Route::get('emergency/access', [EmergencyAccessController::class, 'accessForm'])->name('admin.emergency.access.form');
+                Route::post('emergency/access', [EmergencyAccessController::class, 'access'])->name('admin.emergency.access');
+            });
 
         Route::middleware(['web', 'admin_locale'])
             ->group(__DIR__.'/../Routes/Front/web.php');

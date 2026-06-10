@@ -69,7 +69,7 @@
                                 class="w-[254px] max-w-full"
                                 id="password"
                                 name="password"
-                                rules="required|min:6"
+                                rules="required|min:12"
                                 :label="trans('admin::app.users.reset-password.password')"
                                 :placeholder="trans('admin::app.users.reset-password.password')"
                                 ref="password"
