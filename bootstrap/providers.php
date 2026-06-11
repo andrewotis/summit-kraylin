@@ -8,6 +8,7 @@ use Webkul\Activity\Providers\ActivityServiceProvider;
 use Webkul\Admin\Providers\AdminServiceProvider;
 use Webkul\Attribute\Providers\AttributeServiceProvider;
 use Webkul\Automation\Providers\WorkflowServiceProvider;
+use Webkul\CampaignManager\Providers\CampaignManagerServiceProvider;
 use Webkul\Contact\Providers\ContactServiceProvider;
 use Webkul\Core\Providers\CoreServiceProvider;
 use Webkul\DataGrid\Providers\DataGridServiceProvider;
@@ -24,7 +25,6 @@ use Webkul\Tag\Providers\TagServiceProvider;
 use Webkul\User\Providers\UserServiceProvider;
 use Webkul\Warehouse\Providers\WarehouseServiceProvider;
 use Webkul\WebForm\Providers\WebFormServiceProvider;
-use Webkul\CampaignManager\Providers\CampaignManagerServiceProvider;
 
 return [
     /*
