@@ -339,8 +339,33 @@
                                         <x-admin::form.control-group.error control-name="marketing_template_id" />
                                     </x-admin::form.control-group>
 
-                                    <!-- Status -->
-                                    <x-admin::form.control-group>
+                    <!-- Mailing List -->
+                    <x-admin::form.control-group>
+                        <x-admin::form.control-group.label for="mailing_list_id">
+                            @lang('admin::app.settings.marketing.campaigns.index.create.mailing-list')
+                        </x-admin::form.control-group.label>
+
+                        <x-admin::form.control-group.control
+                            type="select"
+                            class="cursor-pointer"
+                            name="mailing_list_id"
+                            id="mailing_list_id"
+                            ::value="campaign.mailing_list_id"
+                            :label="trans('admin::app.settings.marketing.campaigns.index.create.mailing-list')"
+                        >
+                            <option value="">@lang('admin::app.settings.marketing.campaigns.index.create.all-persons')</option>
+                            <option
+                                v-for="list in mailingLists"
+                                v-text="list.name"
+                                :value="list.id"
+                            ></option>
+                        </x-admin::form.control-group.control>
+
+                        <x-admin::form.control-group.error control-name="mailing_list_id" />
+                    </x-admin::form.control-group>
+
+                    <!-- Status -->
+                    <x-admin::form.control-group>
                                         <x-admin::form.control-group.label for="status">
                                             @lang('admin::app.settings.marketing.campaigns.index.create.status')
                                         </x-admin::form.control-group.label>
@@ -392,19 +417,21 @@
             app.component('v-campaigns', {
                 template: '#v-campaigns-template',
 
-                data() {
-                    return {
-                        isStoring: false,
+                    data() {
+                        return {
+                            isStoring: false,
 
-                        actionType: 'create',
+                            actionType: 'create',
 
-                        campaign: {},
+                            campaign: {},
 
-                        events: [],
+                            events: [],
 
-                        emailTemplates: [],
-                    };
-                },
+                            emailTemplates: [],
+
+                            mailingLists: [],
+                        };
+                    },
 
                 computed: {
                     gridsCount() {
@@ -426,6 +453,8 @@
                     this.getEvents();
 
                     this.getEmailTemplates();
+
+                    this.getMailingLists();
                 },
 
                 methods: {
@@ -465,6 +494,12 @@
                     getEmailTemplates() {
                         this.$axios.get("{{ route('admin.settings.marketing.campaigns.email-templates') }}")
                             .then(response => this.emailTemplates = response.data.data)
+                            .catch(error => {});
+                    },
+
+                    getMailingLists() {
+                        this.$axios.get("{{ route('admin.settings.marketing.campaigns.mailing-lists') }}")
+                            .then(response => this.mailingLists = response.data.data)
                             .catch(error => {});
                     },
 

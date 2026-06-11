@@ -328,6 +328,8 @@ Route::prefix('settings')->group(function () {
 
             Route::get('email-templates', 'getEmailTemplates')->name('admin.settings.marketing.campaigns.email-templates');
 
+            Route::get('mailing-lists', 'getMailingLists')->name('admin.settings.marketing.campaigns.mailing-lists');
+
             Route::post('', 'store')->name('admin.settings.marketing.campaigns.store');
 
             Route::get('{id}', 'show')->name('admin.settings.marketing.campaigns.edit');

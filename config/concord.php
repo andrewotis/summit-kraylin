@@ -22,6 +22,7 @@ return [
         Webkul\WebForm\Providers\ModuleServiceProvider::class,
         Webkul\DataTransfer\Providers\ModuleServiceProvider::class,
         Webkul\MailingList\Providers\ModuleServiceProvider::class,
+        Webkul\CampaignManager\Providers\ModuleServiceProvider::class,
     ],
 
     'register_route_models' => true,

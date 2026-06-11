@@ -11,21 +11,12 @@ use Webkul\Marketing\Repositories\EventRepository;
 
 class Campaign
 {
-    /**
-     * Create a new helper instance.
-     *
-     *
-     * @return void
-     */
     public function __construct(
         protected EventRepository $eventRepository,
         protected CampaignRepository $campaignRepository,
         protected PersonRepository $personRepository,
     ) {}
 
-    /**
-     * Process the email.
-     */
     public function process(): void
     {
         $campaigns = $this->campaignRepository->getModel()
@@ -39,18 +30,34 @@ class Campaign
             })
             ->get();
 
-        collect($campaigns)->each(function ($campaign) {
-            collect($this->getPersonsEmails())->each(fn ($email) => Mail::queue(new CampaignMail($email, $campaign)));
-        });
+        foreach ($campaigns as $campaign) {
+            $campaign->load('mailingList');
+
+            $persons = $this->getPersons($campaign);
+
+            foreach ($persons as $person) {
+                if (! $person->emails) {
+                    continue;
+                }
+
+                foreach (data_get($person->emails, '*.value') as $email) {
+                    Mail::queue(new CampaignMail($email, $campaign, $person));
+                }
+            }
+        }
     }
 
-    /**
-     * Get the email address.
-     */
-    private function getPersonsEmails(): array
+    private function getPersons($campaign): iterable
     {
-        return $this->personRepository->pluck('emails')
-            ->flatMap(fn ($emails) => collect($emails)->pluck('value'))
-            ->all();
+        if ($campaign->mailing_list_id && $campaign->mailingList) {
+            return $campaign->mailingList->subscribers()
+                ->where('is_subscribed', true)
+                ->with('person')
+                ->get()
+                ->pluck('person')
+                ->filter();
+        }
+
+        return $this->personRepository->all();
     }
 }

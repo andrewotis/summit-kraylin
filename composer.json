@@ -80,7 +80,8 @@
             "Webkul\\Warehouse\\": "packages/Webkul/Warehouse/src",
             "Webkul\\WebForm\\": "packages/Webkul/WebForm/src",
             "Webkul\\MailingList\\": "packages/Webkul/MailingList/src",
-            "Webkul\\Automation\\": "packages/Webkul/Automation/src"
+            "Webkul\\Automation\\": "packages/Webkul/Automation/src",
+            "Webkul\\CampaignManager\\": "packages/Webkul/CampaignManager/src"
         }
     },
     "autoload-dev": {

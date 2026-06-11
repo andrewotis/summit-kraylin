@@ -9,23 +9,19 @@ use Webkul\Admin\DataGrids\Settings\Marketing\CampaignDatagrid;
 use Webkul\Admin\Http\Controllers\Controller;
 use Webkul\Admin\Http\Requests\MassDestroyRequest;
 use Webkul\EmailTemplate\Repositories\EmailTemplateRepository;
+use Webkul\MailingList\Repositories\MailingListRepository;
 use Webkul\Marketing\Repositories\CampaignRepository;
 use Webkul\Marketing\Repositories\EventRepository;
 
 class CampaignsController extends Controller
 {
-    /**
-     * Create new a controller instance.
-     */
     public function __construct(
         protected CampaignRepository $campaignRepository,
         protected EventRepository $eventRepository,
         protected EmailTemplateRepository $emailTemplateRepository,
+        protected MailingListRepository $mailingListRepository,
     ) {}
 
-    /**
-     * Display a listing of the marketing campaigns.
-     */
     public function index(): View|JsonResponse
     {
         if (request()->isXmlHttpRequest()) {
@@ -35,9 +31,6 @@ class CampaignsController extends Controller
         return view('admin::settings.marketing.campaigns.index');
     }
 
-    /**
-     * Get marketing events.
-     */
     public function getEvents(): JsonResponse
     {
         $events = $this->eventRepository->get(['id', 'name']);
@@ -47,9 +40,6 @@ class CampaignsController extends Controller
         ]);
     }
 
-    /**
-     * Get Email Templates.
-     */
     public function getEmailTemplates(): JsonResponse
     {
         $emailTemplates = $this->emailTemplateRepository->get(['id', 'name']);
@@ -59,9 +49,15 @@ class CampaignsController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created marketing campaign in storage.
-     */
+    public function getMailingLists(): JsonResponse
+    {
+        $mailingLists = $this->mailingListRepository->get(['id', 'name']);
+
+        return response()->json([
+            'data' => $mailingLists,
+        ]);
+    }
+
     public function store(): JsonResponse
     {
         $validatedData = $this->validate(request(), [
@@ -69,6 +65,7 @@ class CampaignsController extends Controller
             'subject' => 'required|string|max:255',
             'marketing_template_id' => 'required|exists:email_templates,id',
             'marketing_event_id' => 'required|exists:marketing_events,id',
+            'mailing_list_id' => 'nullable|exists:mailing_lists,id',
             'status' => 'sometimes|required|in:0,1',
         ]);
 
@@ -83,9 +80,6 @@ class CampaignsController extends Controller
         ]);
     }
 
-    /**
-     * Show the specified Resource.
-     */
     public function show(int $id): JsonResponse
     {
         $campaign = $this->campaignRepository->findOrFail($id);
@@ -95,9 +89,6 @@ class CampaignsController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified marketing campaign in storage.
-     */
     public function update(int $id): JsonResponse
     {
         $validatedData = $this->validate(request(), [
@@ -105,6 +96,7 @@ class CampaignsController extends Controller
             'subject' => 'required|string|max:255',
             'marketing_template_id' => 'required|exists:email_templates,id',
             'marketing_event_id' => 'required|exists:marketing_events,id',
+            'mailing_list_id' => 'nullable|exists:mailing_lists,id',
             'status' => 'sometimes|required|in:0,1',
         ]);
 
@@ -119,9 +111,6 @@ class CampaignsController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified marketing campaign from storage.
-     */
     public function destroy(int $id): JsonResponse
     {
         Event::dispatch('settings.marketing.campaigns.delete.before', $id);
@@ -135,9 +124,6 @@ class CampaignsController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified marketing campaigns from storage.
-     */
     public function massDestroy(MassDestroyRequest $massDestroyRequest): JsonResponse
     {
         $campaigns = $this->campaignRepository->findWhereIn('id', $massDestroyRequest->input('indices'));

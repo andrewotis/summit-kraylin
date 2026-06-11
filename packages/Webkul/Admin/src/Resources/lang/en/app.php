@@ -1153,6 +1153,8 @@ return [
                         'subject' => 'Subject',
                         'event' => 'Event',
                         'email-template' => 'Email Template',
+                        'mailing-list' => 'Mailing List (optional)',
+                        'all-persons' => 'All Persons',
                         'status' => 'Status',
                     ],
                     'edit' => [

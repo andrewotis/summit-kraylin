@@ -24,6 +24,7 @@ use Webkul\User\Providers\UserServiceProvider;
 use Webkul\Warehouse\Providers\WarehouseServiceProvider;
 use Webkul\MailingList\Providers\MailingListServiceProvider;
 use Webkul\WebForm\Providers\WebFormServiceProvider;
+use Webkul\CampaignManager\Providers\CampaignManagerServiceProvider;
 
 return [
     /*
@@ -60,5 +61,6 @@ return [
     UserServiceProvider::class,
     WarehouseServiceProvider::class,
     MailingListServiceProvider::class,
+    CampaignManagerServiceProvider::class,
     WebFormServiceProvider::class,
 ];

@@ -6,40 +6,80 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Webkul\Attribute\Repositories\AttributeRepository;
+use Webkul\Contact\Contracts\Person;
 use Webkul\Marketing\Contracts\Campaign;
 
 class CampaignMail extends Mailable
 {
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
     public function __construct(
         public string $email,
-        public Campaign $campaign
+        public Campaign $campaign,
+        public ?Person $person = null,
     ) {}
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
             to: [
                 new Address($this->email),
             ],
-            subject: $this->campaign->subject,
+            subject: $this->replacePlaceholders($this->campaign->subject),
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
-            htmlString: $this->campaign->email_template->content,
+            htmlString: $this->replacePlaceholders($this->campaign->email_template->content),
         );
+    }
+
+    private function replacePlaceholders(string $content): string
+    {
+        if (! $this->person) {
+            return $content;
+        }
+
+        $attributeRepository = app(AttributeRepository::class);
+
+        $attributes = $attributeRepository->findByField('entity_type', 'persons');
+
+        foreach ($attributes as $attribute) {
+            $value = '';
+
+            if (isset($this->person->{$attribute->code})) {
+                $personValue = $this->person->{$attribute->code};
+
+                if (in_array($attribute->type, ['email', 'phone']) && is_array($personValue)) {
+                    $labels = [];
+
+                    foreach ($personValue as $item) {
+                        $labels[] = ($item['value'] ?? '').' ('.($item['label'] ?? '').')';
+                    }
+
+                    $value = implode(', ', $labels);
+                } elseif ($attribute->type === 'address' && is_array($personValue)) {
+                    $value = ($personValue['address'] ?? '').'<br>'
+                           .($personValue['postcode'] ?? '').' '.($personValue['city'] ?? '').'<br>'
+                           .($personValue['state'] ?? '').'<br>'
+                           .($personValue['country'] ?? '');
+                } else {
+                    $value = $personValue;
+                }
+            }
+
+            $content = strtr($content, [
+                '{%persons.'.$attribute->code.'%}' => $value,
+                '{% persons.'.$attribute->code.' %}' => $value,
+            ]);
+        }
+
+        $content = strtr($content, [
+            '{%unsubscribe_url%}' => '',
+            '{% unsubscribe_url %}' => '',
+        ]);
+
+        return $content;
     }
 }
