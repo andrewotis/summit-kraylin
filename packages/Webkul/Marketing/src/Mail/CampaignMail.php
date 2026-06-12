@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Webkul\Attribute\Repositories\AttributeRepository;
 use Webkul\Contact\Contracts\Person;
 use Webkul\Marketing\Contracts\Campaign;
+use Webkul\Marketing\Http\Controllers\UnsubscribeController;
 
 class CampaignMail extends Mailable
 {
@@ -37,49 +38,69 @@ class CampaignMail extends Mailable
 
     private function replacePlaceholders(string $content): string
     {
-        if (! $this->person) {
-            return $content;
-        }
+        if ($this->person) {
+            $attributeRepository = app(AttributeRepository::class);
 
-        $attributeRepository = app(AttributeRepository::class);
+            $attributes = $attributeRepository->findByField('entity_type', 'persons');
 
-        $attributes = $attributeRepository->findByField('entity_type', 'persons');
+            foreach ($attributes as $attribute) {
+                $value = '';
 
-        foreach ($attributes as $attribute) {
-            $value = '';
+                if (isset($this->person->{$attribute->code})) {
+                    $personValue = $this->person->{$attribute->code};
 
-            if (isset($this->person->{$attribute->code})) {
-                $personValue = $this->person->{$attribute->code};
+                    if (in_array($attribute->type, ['email', 'phone']) && is_array($personValue)) {
+                        $labels = [];
 
-                if (in_array($attribute->type, ['email', 'phone']) && is_array($personValue)) {
-                    $labels = [];
+                        foreach ($personValue as $item) {
+                            $labels[] = ($item['value'] ?? '').' ('.($item['label'] ?? '').')';
+                        }
 
-                    foreach ($personValue as $item) {
-                        $labels[] = ($item['value'] ?? '').' ('.($item['label'] ?? '').')';
+                        $value = implode(', ', $labels);
+                    } elseif ($attribute->type === 'address' && is_array($personValue)) {
+                        $value = ($personValue['address'] ?? '').'<br>'
+                               .($personValue['postcode'] ?? '').' '.($personValue['city'] ?? '').'<br>'
+                               .($personValue['state'] ?? '').'<br>'
+                               .($personValue['country'] ?? '');
+                    } else {
+                        $value = $personValue;
                     }
-
-                    $value = implode(', ', $labels);
-                } elseif ($attribute->type === 'address' && is_array($personValue)) {
-                    $value = ($personValue['address'] ?? '').'<br>'
-                           .($personValue['postcode'] ?? '').' '.($personValue['city'] ?? '').'<br>'
-                           .($personValue['state'] ?? '').'<br>'
-                           .($personValue['country'] ?? '');
-                } else {
-                    $value = $personValue;
                 }
-            }
 
-            $content = strtr($content, [
-                '{%persons.'.$attribute->code.'%}' => $value,
-                '{% persons.'.$attribute->code.' %}' => $value,
-            ]);
+                $content = strtr($content, [
+                    '{%persons.'.$attribute->code.'%}' => $value,
+                    '{% persons.'.$attribute->code.' %}' => $value,
+                ]);
+            }
         }
+
+        $unsubscribeUrl = $this->unsubscribeUrl();
 
         $content = strtr($content, [
-            '{%unsubscribe_url%}' => '',
-            '{% unsubscribe_url %}' => '',
+            '{%unsubscribe_url%}' => $unsubscribeUrl,
+            '{% unsubscribe_url %}' => $unsubscribeUrl,
         ]);
 
         return $content;
+    }
+
+    private function unsubscribeUrl(): string
+    {
+        if (! $this->person || ! $this->campaign->mailing_list_id) {
+            return '#';
+        }
+
+        $subscriber = $this->person->subscribers()
+            ->where('mailing_list_id', $this->campaign->mailing_list_id)
+            ->first();
+
+        if (! $subscriber) {
+            return '#';
+        }
+
+        return route('marketing.unsubscribe', [
+            'id' => $subscriber->id,
+            'signature' => UnsubscribeController::signature($subscriber->id),
+        ]);
     }
 }

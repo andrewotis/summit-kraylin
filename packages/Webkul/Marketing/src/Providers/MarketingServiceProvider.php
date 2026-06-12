@@ -3,26 +3,25 @@
 namespace Webkul\Marketing\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Webkul\Marketing\Console\Commands\CampaignCommand;
 
 class MarketingServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap services.
-     */
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
+
+        $this->loadViewsFrom(__DIR__.'/../Resources/views', 'marketing');
+
+        $this->loadRoutes();
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->command('campaign:process')->daily();
         });
     }
 
-    /**
-     * Register services.
-     */
     public function register(): void
     {
         $this->registerCommands();
@@ -30,9 +29,6 @@ class MarketingServiceProvider extends ServiceProvider
         $this->app->register(ModuleServiceProvider::class);
     }
 
-    /**
-     * Register the commands.
-     */
     private function registerCommands(): void
     {
         if ($this->app->runningInConsole()) {
@@ -40,5 +36,11 @@ class MarketingServiceProvider extends ServiceProvider
                 CampaignCommand::class,
             ]);
         }
+    }
+
+    private function loadRoutes(): void
+    {
+        Route::middleware('web')
+            ->group(__DIR__.'/../Routes/web.php');
     }
 }
