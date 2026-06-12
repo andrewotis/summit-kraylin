@@ -21,7 +21,7 @@ return new class extends Migration
         DB::table('persons')->whereNotNull('emails')->lazyById()->each(function ($person) {
             try {
                 decrypt($person->emails);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::table('persons')
                     ->where('id', $person->id)
                     ->update(['emails' => encrypt($person->emails)]);
@@ -31,7 +31,7 @@ return new class extends Migration
         DB::table('persons')->whereNotNull('contact_numbers')->lazyById()->each(function ($person) {
             try {
                 decrypt($person->contact_numbers);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::table('persons')
                     ->where('id', $person->id)
                     ->update(['contact_numbers' => encrypt($person->contact_numbers)]);
@@ -41,7 +41,7 @@ return new class extends Migration
         DB::table('organizations')->whereNotNull('address')->lazyById()->each(function ($org) {
             try {
                 decrypt($org->address);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::table('organizations')
                     ->where('id', $org->id)
                     ->update(['address' => encrypt($org->address)]);
@@ -57,7 +57,8 @@ return new class extends Migration
                 DB::table('persons')
                     ->where('id', $person->id)
                     ->update(['emails' => $decrypted]);
-            } catch (\Exception $e) {}
+            } catch (Exception $e) {
+            }
         });
 
         DB::table('persons')->whereNotNull('contact_numbers')->lazyById()->each(function ($person) {
@@ -66,7 +67,8 @@ return new class extends Migration
                 DB::table('persons')
                     ->where('id', $person->id)
                     ->update(['contact_numbers' => $decrypted]);
-            } catch (\Exception $e) {}
+            } catch (Exception $e) {
+            }
         });
 
         DB::table('organizations')->whereNotNull('address')->lazyById()->each(function ($org) {
@@ -75,7 +77,8 @@ return new class extends Migration
                 DB::table('organizations')
                     ->where('id', $org->id)
                     ->update(['address' => $decrypted]);
-            } catch (\Exception $e) {}
+            } catch (Exception $e) {
+            }
         });
 
         Schema::table('persons', function (Blueprint $table) {
