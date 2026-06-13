@@ -18,9 +18,9 @@ class SecurityHeaders
 
         $csp = "default-src 'self'; "
             ."script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://npmcdn.com https://cdnjs.cloudflare.com; "
-            ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://npmcdn.com; "
-            ."font-src 'self' data: https://fonts.gstatic.com; "
-            ."img-src 'self' data: https://chart.googleapis.com; "
+            ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://npmcdn.com https://unpkg.com https://cdnjs.cloudflare.com; "
+            ."font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+            ."img-src 'self' data: https://chart.googleapis.com https://cdnjs.cloudflare.com; "
             ."connect-src 'self'; "
             ."frame-ancestors 'none'; "
             ."form-action 'self'; "

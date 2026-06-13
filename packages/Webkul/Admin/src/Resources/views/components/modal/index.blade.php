@@ -47,7 +47,7 @@
     @endisset
 </v-modal>
 
-@pushOnce('scripts')
+@pushOnce('scripts', 'v-modal')
     <script
         type="text/x-template"
         id="v-modal-template"

@@ -60,3 +60,77 @@ php artisan test --compact   # run the Pest test suite
 - Add tests for new behavior; follow the `pest-testing` skill.
 - Run `./vendor/bin/pint` before committing — CI applies Pint formatting.
 - Validate the skills setup with `bash bin/validate-skills.sh`.
+
+---
+
+## Create Form Troubleshooting (Contacts/Persons)
+
+The standalone person create form (`/contacts/persons/create`) had extensive
+debugging. Key findings that may apply to other create/edit forms:
+
+### `entity_type` Added by Controller Constructor
+- `PersonController::__construct()` calls
+  `request()->request->add(['entity_type' => 'persons'])` — the `entity_type`
+  parameter is NOT rendered as a hidden form field; it's injected via the
+  controller constructor before validation runs.
+- The `AttributeForm::rules()` method queries attributes by `request('entity_type')`,
+  so this must be set before form request validation fires.
+
+### Native `<form>` vs `<x-admin::form>`
+- `<x-admin::form as="form">` wraps a `<v-form>` (Vee-Validate) component that
+  intercepts submission via `@submit.prevent`. If Vue fails to compile or
+  Vee-Validate rules mismatch server rules, the form silently does nothing.
+- **Fix:** replace `<x-admin::form as="form">` with a native `<form method="POST" action="...">`
+  + `@csrf` + plain `<button type="submit">` (no `@click.prevent`). This
+  bypasses all Vee-Validate frontend interception.
+
+### `::name` Attribute Handling (`control.blade.php`)
+- Blade components (e.g. `<x-admin::form.control-group.control>`) receive
+  `::name="\`${expr}\`"` as key `:name` in `$attributes` (single colon).
+- The `control.blade.php` component must:
+  1. Extract `$attributes->get(':name')` into `$dynamicName`
+  2. Strip it with `$attributes->except([':name'])`
+  3. Output `:name="{!! $dynamicName !!}"` on BOTH `<v-field>` and `<input>`
+- Outputting `::name` twice (duplicate `:name`) on `<v-field>` causes an
+  infinite JS render loop ("slowing down" in Firefox).
+
+### `v-model` Placement
+- When `<input>` is inside `<v-field v-slot="{ field }">`, putting `v-model` on
+  `<v-field>` causes the input's DOM `value` property to be the whole field
+  object (`[object Object]`), not the user's string.
+- **Fix:** always place `v-model` on the actual `<input>`/`<select>` element,
+  not on `<v-field>`. This applies to `text`, `textarea`, and `select` cases
+  in `control.blade.php`.
+
+### Email/Phone Label Not Submitted
+- The email/phone Vue components render a `<select>` for `label` (with
+  `::name="\`${code}[${index}][label]\`"`). When the form is submitted natively
+  (not via Vee-Validate), this select's value is **not included** in the POST
+  body — Vee-Validate's `<v-field>` manages the select's name and the native
+  browser serialization may not pick it up.
+- **Fix:** make `emails.*.label` and `contact_numbers.*.label` `'nullable'` in
+  `AttributeForm::rules()` (instead of `$attribute->is_required ? 'required' : 'nullable'`).
+
+### Encrypted Column Types
+- Columns using `'encrypted'` or `'encrypted:array'` Eloquent casts store raw
+  ciphertext. They must use `text` (or `longtext`) column type — `json` type
+  rejects encrypted strings in MySQL 8.0+.
+- **Affected columns (`json→text` migrations):** `attribute_values.json_value`,
+  `activities.additional`, `emails.from`, `emails.sender`, `emails.reply_to`,
+  `emails.cc`, `emails.bcc`, `emails.reference_ids`.
+- **Affected columns (`string→text` migration):** `emails.subject`,
+  `emails.name` — `varchar(255)` is too short for encrypted payloads (can
+  exceed 300 chars for even short subjects).
+- Datagrids using `DB::table()` (not Eloquent) display raw ciphertext. Use
+  `decrypt($value, false)` inside closures to display decrypted values.
+- Known datagrids needing decrypt closures: `EmailDataGrid` (name, from,
+  subject, reply).
+
+### `@pushOnce` Keys
+- Multiple Blade components used `@pushOnce('scripts')` without a key — only the
+  first push was rendered. Add unique keys like `@pushOnce('scripts', 'v-email-component')`.
+
+### Laravel 12 Encrypted Cast Behavior
+- `'encrypted'` cast uses `encrypt($value, false)` (no PHP serialization).
+- `'encrypted:array'` cast uses `Json::encode` + `Crypt::encryptString`.
+- Both require `decrypt($value, false)` for manual decryption.

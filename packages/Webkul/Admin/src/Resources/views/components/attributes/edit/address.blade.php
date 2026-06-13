@@ -9,7 +9,7 @@
     </v-address-component>
 @endif
 
-@pushOnce('scripts')
+@pushOnce('scripts', 'v-address-component')
     <script
         type="text/x-template"
         id="v-address-component-template"

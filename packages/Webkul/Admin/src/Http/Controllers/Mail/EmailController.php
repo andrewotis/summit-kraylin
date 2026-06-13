@@ -15,6 +15,7 @@ use Webkul\Admin\Http\Controllers\Controller;
 use Webkul\Admin\Http\Requests\MassDestroyRequest;
 use Webkul\Admin\Http\Requests\MassUpdateRequest;
 use Webkul\Admin\Http\Resources\EmailResource;
+use Webkul\Contact\Repositories\PersonRepository;
 use Webkul\Email\Enums\SupportedFolderEnum;
 use Webkul\Email\InboundEmailProcessor\Contracts\InboundEmailProcessor;
 use Webkul\Email\Mails\Email;
@@ -32,7 +33,8 @@ class EmailController extends Controller
     public function __construct(
         protected LeadRepository $leadRepository,
         protected EmailRepository $emailRepository,
-        protected AttachmentRepository $attachmentRepository
+        protected AttachmentRepository $attachmentRepository,
+        protected PersonRepository $personRepository
     ) {}
 
     /**
@@ -105,17 +107,39 @@ class EmailController extends Controller
     }
 
     /**
+     * Validate that all recipient emails belong to known contacts.
+     */
+    private function validateRecipients(): void
+    {
+        $knownEmails = $this->personRepository->getAllKnownEmails();
+
+        $validator = function (string $attribute, mixed $value, \Closure $fail) use ($knownEmails) {
+            foreach ($value as $email) {
+                if (! in_array($email, $knownEmails)) {
+                    $fail(__('admin::app.mail.index.validation.invalid-recipient', ['email' => $email]));
+                }
+            }
+        };
+
+        $this->validate(request(), [
+            'reply_to' => ['required', 'array', 'min:1', $validator],
+            'reply_to.*' => 'email',
+            'cc' => ['nullable', 'array', $validator],
+            'cc.*' => 'email',
+            'bcc' => ['nullable', 'array', $validator],
+            'bcc.*' => 'email',
+            'reply' => 'required',
+        ]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @return Response
      */
     public function store()
     {
-        $this->validate(request(), [
-            'reply_to' => 'required|array|min:1',
-            'reply_to.*' => 'email',
-            'reply' => 'required',
-        ]);
+        $this->validateRecipients();
 
         Event::dispatch('email.create.before');
 
@@ -160,6 +184,8 @@ class EmailController extends Controller
      */
     public function update($id)
     {
+        $this->validateRecipients();
+
         Event::dispatch('email.update.before', $id);
 
         $data = request()->all();
@@ -205,6 +231,22 @@ class EmailController extends Controller
         session()->flash('success', trans('admin::app.mail.update-success'));
 
         return redirect()->back();
+    }
+
+    /**
+     * Return matching contact email addresses for autocomplete.
+     */
+    public function contactEmails(): JsonResponse
+    {
+        $query = request('q', '');
+
+        $emails = $this->personRepository->getAllKnownEmails();
+
+        if ($query) {
+            $emails = array_values(array_filter($emails, fn ($email) => str_contains($email, $query)));
+        }
+
+        return response()->json(['data' => $emails]);
     }
 
     /**

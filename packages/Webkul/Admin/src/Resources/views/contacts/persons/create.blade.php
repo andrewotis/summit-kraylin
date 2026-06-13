@@ -7,10 +7,13 @@
     {!! view_render_event('admin.persons.create.form.before') !!}
 
     <!--Create Page Form -->
-    <x-admin::form
-        :action="route('admin.contacts.persons.store')"
+    <form
+        method="POST"
+        action="{{ route('admin.contacts.persons.store') }}"
         enctype="multipart/form-data"
     >
+        @csrf
+
         <div class="flex flex-col gap-4">
             <!-- Header -->
             <div class="scroll-reactive-sticky sticky top-[60px] z-[1000] flex items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm shadow-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
@@ -69,7 +72,7 @@
                 {!! view_render_event('admin.persons.create.form_controls.after') !!}
             </div>
         </div>
-    </x-admin::form>
+    </form>
 
     {!! view_render_event('admin.persons.create.form.after') !!}
 

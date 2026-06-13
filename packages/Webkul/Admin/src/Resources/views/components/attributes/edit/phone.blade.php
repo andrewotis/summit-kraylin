@@ -26,7 +26,7 @@
     </v-phone-component>
 @endif
 
-@pushOnce('scripts')
+@pushOnce('scripts', 'v-phone-component')
     <script
         type="text/x-template"
         id="v-phone-component-template"

@@ -183,6 +183,16 @@ with alumni/patient outreach and HIPAA compliance.
 - [ ] Build campaign performance dashboard with charts (total sent, open rate, click rate, delivery success)
 - [ ] Add per-campaign detail view with recipient-level status
 
+### Phase 6: Tag-Based Email Targeting & Organization Tags (2–3 weeks)
+
+- [ ] **Organization tags:** Create `organization_tags` pivot table + migration + `tags()` relationship on `Organization` model
+- [ ] **Organization tag controller/routes:** Add `TagController` for organizations (attach/detach), matching the existing person/lead pattern
+- [ ] **Organization tag UI:** Add `<x-admin::tags>` component to organization view page
+- [ ] **Tag→mailing-list filter:** Add tag-based filtering when creating/editing a mailing list — e.g., "include persons tagged with X" or "include organizations tagged with Y"
+- [ ] **Dynamic subscriber resolution:** When a campaign targets a mailing list that has tag filters, resolve subscribers dynamically (persons whose tags match OR persons belonging to tagged organizations)
+- [ ] **Tag filter UI in mailing lists:** Add multi-select tag picker to the mailing-list create/edit form, stored as JSON or pivot
+- [ ] **Campaign engine update:** `Campaign::getPersons()` already handles mailing-list-based scoping; extend to respect tag filters
+
 ### Ongoing Compliance
 
 - [ ] Annual HIPAA risk assessment

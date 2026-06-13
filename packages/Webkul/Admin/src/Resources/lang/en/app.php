@@ -332,8 +332,8 @@ return [
         ],
         'modal' => [
             'confirm' => [
-                'agree-btn' => 'Agree',
-                'disagree-btn' => 'Disagree',
+                'agree-btn' => 'Yes',
+                'disagree-btn' => 'No',
                 'message' => 'Are you sure you want to perform this action?',
                 'title' => 'Are you sure?',
             ],
@@ -1763,6 +1763,9 @@ return [
                 'edit' => 'Edit',
                 'view' => 'View',
                 'delete' => 'Delete',
+            ],
+            'validation' => [
+                'invalid-recipient' => 'The email ":email" is not associated with any contact in the CRM.',
             ],
         ],
         'create-success' => 'Email sent successfully.',

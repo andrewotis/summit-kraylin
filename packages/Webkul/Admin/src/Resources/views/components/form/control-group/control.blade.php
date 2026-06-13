@@ -3,6 +3,14 @@
     'name' => '',
 ])
 
+@php
+    $dynamicName = $attributes->get(':name');
+    $hasDynamicName = ! is_null($dynamicName) && $dynamicName !== '';
+    if ($hasDynamicName) {
+        $attributes = $attributes->except([':name']);
+    }
+@endphp
+
 @switch($type)
     @case('hidden')
     @case('text')
@@ -12,14 +20,23 @@
         <v-field
             v-slot="{ field, errors }"
             {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label']) }}
+            @if(! $hasDynamicName)
             name="{{ $name }}"
+            @else
+            :name="{!! $dynamicName !!}"
+            @endif
         >
             <input
                 type="{{ $type }}"
+                @if($hasDynamicName)
+                :name="{!! $dynamicName !!}"
+                @else
                 name="{{ $name }}"
+                @endif
                 v-bind="field"
                 :class="[errors.length ? 'border !border-red-600 hover:border-red-600' : '']"
-                {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label'])->merge(['class' => 'w-full rounded border border-gray-300 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400']) }}
+                {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', ':name'])->merge(['class' => 'w-full rounded border border-gray-300 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400']) }}
+                {{ $attributes->only(['v-model']) }}
             />
         </v-field>
 
@@ -29,7 +46,11 @@
         <v-field
             v-slot="{ field, errors }"
             {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label']) }}
+            @if(! $hasDynamicName)
             name="{{ $name }}"
+            @else
+            :name="{!! $dynamicName !!}"
+            @endif
         >
             <div
                 class="flex w-full items-center overflow-hidden rounded-md border text-sm text-gray-600 transition-all focus-within:border-gray-400 hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400"
@@ -47,9 +68,13 @@
 
                 <input
                     type="text"
+                    @if($hasDynamicName)
+                    :name="{!! $dynamicName !!}"
+                    @else
                     name="{{ $name }}"
+                    @endif
                     v-bind="field"
-                    {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label'])->merge(['class' => 'w-full p-2.5 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300']) }}
+                    {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', ':name'])->merge(['class' => 'w-full p-2.5 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300']) }}
                 />
             </div>
         </v-field>
@@ -93,7 +118,11 @@
         <v-field
             v-slot="{ field, errors }"
             {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label']) }}
+            @if(! $hasDynamicName)
             name="{{ $name }}"
+            @else
+            :name="{!! $dynamicName !!}"
+            @endif
         >
             @php
                 $defaultAttributes = [
@@ -107,14 +136,19 @@
 
             <textarea
                 type="{{ $type }}"
+                @if($hasDynamicName)
+                :name="{!! $dynamicName !!}"
+                @else
                 name="{{ $name }}"
+                @endif
                 v-bind="field"
                 :class="[errors.length ? 'border !border-red-600 hover:border-red-600' : '']"
                 {{
                     $attributes
-                        ->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label'])
+                        ->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', ':name'])
                         ->merge($defaultAttributes)
                 }}
+                {{ $attributes->only(['v-model']) }}
             >
             </textarea>
 
@@ -133,13 +167,20 @@
             v-slot="{ field, errors }"
             {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label'])->merge(['rules' => 'regex:^\d{4}-\d{2}-\d{2}$']) }}
             name="{{ $name }}"
+            @if($hasDynamicName)
+            :name="{!! $dynamicName !!}"
+            @endif
         >
             <x-admin::flat-picker.date>
                 <input
+                    @if($hasDynamicName)
+                    :name="{!! $dynamicName !!}"
+                    @else
                     name="{{ $name }}"
+                    @endif
                     v-bind="field"
                     :class="[errors.length ? 'border !border-red-600 hover:border-red-600' : '']"
-                    {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label'])->merge(['class' => 'w-full rounded border border-gray-300 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400']) }}
+                    {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', ':name'])->merge(['class' => 'w-full rounded border border-gray-300 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400']) }}
                     autocomplete="off"
                 />
             </x-admin::flat-picker.date>
@@ -152,13 +193,20 @@
             v-slot="{ field, errors }"
             {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label'])->merge(['rules' => 'regex:^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$']) }}
             name="{{ $name }}"
+            @if($hasDynamicName)
+            :name="{!! $dynamicName !!}"
+            @endif
         >
             <x-admin::flat-picker.datetime>
                 <input
+                    @if($hasDynamicName)
+                    :name="{!! $dynamicName !!}"
+                    @else
                     name="{{ $name }}"
+                    @endif
                     v-bind="field"
                     :class="[errors.length ? 'border !border-red-600 hover:border-red-600' : '']"
-                    {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label'])->merge(['class' => 'w-full rounded border border-gray-300 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400']) }}
+                    {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', ':name'])->merge(['class' => 'w-full rounded border border-gray-300 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400']) }}
                     autocomplete="off"
                 >
             </x-admin::flat-picker.datetime>
@@ -170,12 +218,20 @@
             v-slot="{ field, errors }"
             {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label']) }}
             name="{{ $name }}"
+            @if($hasDynamicName)
+            :name="{!! $dynamicName !!}"
+            @endif
         >
             <select
+                @if($hasDynamicName)
+                :name="{!! $dynamicName !!}"
+                @else
                 name="{{ $name }}"
+                @endif
                 v-bind="field"
                 :class="[errors.length ? 'border border-red-500' : '']"
-                {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label'])->merge(['class' => 'custom-select w-full rounded border border-gray-300 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400']) }}
+                {{ $attributes->except(['value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', ':name'])->merge(['class' => 'custom-select w-full rounded border border-gray-300 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400']) }}
+                {{ $attributes->only(['v-model']) }}
             >
                 {{ $slot }}
             </select>
@@ -188,8 +244,11 @@
             as="select"
             v-slot="{ value }"
             :class="[errors && errors['{{ $name }}'] ? 'border !border-red-600 hover:border-red-600' : '']"
-            {{ $attributes->except([])->merge(['class' => 'flex w-full flex-col rounded-md border bg-white px-3 py-2.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400']) }}
+            {{ $attributes->except([':name'])->merge(['class' => 'flex w-full flex-col rounded-md border bg-white px-3 py-2.5 text-sm font-normal text-gray-600 transition-all hover:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400']) }}
             name="{{ $name }}"
+            @if($hasDynamicName)
+            :name="{!! $dynamicName !!}"
+            @endif
             multiple
         >
             {{ $slot }}
@@ -204,13 +263,20 @@
             class="hidden"
             {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', 'key', ':key']) }}
             name="{{ $name }}"
+            @if($hasDynamicName)
+            :name="{!! $dynamicName !!}"
+            @endif
         >
             <input
                 type="checkbox"
+                @if($hasDynamicName)
+                :name="{!! $dynamicName !!}"
+                @else
                 name="{{ $name }}"
+                @endif
                 v-bind="field"
                 class="peer sr-only"
-                {{ $attributes->except(['rules', 'label', ':label', 'key', ':key']) }}
+                {{ $attributes->except(['rules', 'label', ':label', 'key', ':key', ':name']) }}
             />
 
             <v-checked-handler
@@ -239,12 +305,19 @@
             v-slot="{ field }"
             {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', 'key', ':key']) }}
             name="{{ $name }}"
+            @if($hasDynamicName)
+            :name="{!! $dynamicName !!}"
+            @endif
         >
             <input
                 type="radio"
+                @if($hasDynamicName)
+                :name="{!! $dynamicName !!}"
+                @else
                 name="{{ $name }}"
+                @endif
                 v-bind="field"
-                {{ $attributes->except(['rules', 'label', ':label', 'key', ':key'])->merge(['class' => 'peer sr-only']) }}
+                {{ $attributes->except(['rules', 'label', ':label', 'key', ':key', ':name'])->merge(['class' => 'peer sr-only']) }}
             />
 
             <v-checked-handler
@@ -270,14 +343,21 @@
                 v-slot="{ field }"
                 {{ $attributes->only(['name', ':name', 'value', ':value', 'v-model', 'rules', ':rules', 'label', ':label', 'key', ':key']) }}
                 name="{{ $name }}"
+                @if($hasDynamicName)
+                :name="{!! $dynamicName !!}"
+                @endif
             >
                 <input
                     type="checkbox"
+                    @if($hasDynamicName)
+                    :name="{!! $dynamicName !!}"
+                    @else
                     name="{{ $name }}"
+                    @endif
                     id="{{ $name }}"
                     class="peer sr-only"
                     v-bind="field"
-                    {{ $attributes->except(['v-model', 'rules', ':rules', 'label', ':label', 'key', ':key']) }}
+                    {{ $attributes->except(['v-model', 'rules', ':rules', 'label', ':label', 'key', ':key', ':name']) }}
                 />
 
                 <v-checked-handler
@@ -326,7 +406,7 @@
         @break
 @endswitch
 
-@pushOnce('scripts')
+@pushOnce('scripts', 'v-checked-handler')
     <script
         type="text/x-template"
         id="v-checked-handler-template"

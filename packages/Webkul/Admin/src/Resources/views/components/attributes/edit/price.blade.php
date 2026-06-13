@@ -7,7 +7,7 @@
     </v-price-component>
 @endif
 
-@pushOnce('scripts')
+@pushOnce('scripts', 'v-price-component')
     <script
         type="text/x-template"
         id="v-price-component-template"

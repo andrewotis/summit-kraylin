@@ -106,7 +106,7 @@ class QuoteDataGrid extends DataGrid
             'closure' => function ($row) {
                 $route = route('admin.contacts.persons.view', $row->person_id);
 
-                return "<a class=\"text-brandColor transition-all hover:underline\" href='".$route."'>".$row->person_name.'</a>';
+                return "<a class=\"text-brandColor transition-all hover:underline\" href='".$route."'>".decrypt($row->person_name, false).'</a>';
             },
         ]);
 

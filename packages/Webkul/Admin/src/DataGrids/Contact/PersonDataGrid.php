@@ -64,6 +64,13 @@ class PersonDataGrid extends DataGrid
             'sortable' => true,
             'filterable' => true,
             'searchable' => true,
+            'closure' => function ($row) {
+                try {
+                    return decrypt($row->person_name, false);
+                } catch (\Exception $e) {
+                    return $row->person_name;
+                }
+            },
         ]);
 
         $this->addColumn([
@@ -73,7 +80,15 @@ class PersonDataGrid extends DataGrid
             'sortable' => false,
             'filterable' => true,
             'searchable' => true,
-            'closure' => fn ($row) => collect(json_decode($row->emails, true) ?? [])->pluck('value')->join(', '),
+            'closure' => function ($row) {
+                try {
+                    $decrypted = decrypt($row->emails, false);
+
+                    return collect(json_decode($decrypted, true) ?? [])->pluck('value')->join(', ');
+                } catch (\Exception $e) {
+                    return $row->emails;
+                }
+            },
         ]);
 
         $this->addColumn([
@@ -83,7 +98,15 @@ class PersonDataGrid extends DataGrid
             'sortable' => true,
             'filterable' => true,
             'searchable' => true,
-            'closure' => fn ($row) => collect(json_decode($row->contact_numbers, true) ?? [])->pluck('value')->join(', '),
+            'closure' => function ($row) {
+                try {
+                    $decrypted = decrypt($row->contact_numbers, false);
+
+                    return collect(json_decode($decrypted, true) ?? [])->pluck('value')->join(', ');
+                } catch (\Exception $e) {
+                    return $row->contact_numbers;
+                }
+            },
         ]);
 
         $this->addColumn([
@@ -101,6 +124,13 @@ class PersonDataGrid extends DataGrid
                     'value' => 'name',
                 ],
             ],
+            'closure' => function ($row) {
+                try {
+                    return decrypt($row->organization, false);
+                } catch (\Exception $e) {
+                    return $row->organization;
+                }
+            },
         ]);
     }
 

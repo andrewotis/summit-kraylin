@@ -45,7 +45,14 @@ window.app = createApp({
     },
 
     methods: {
-        onSubmit() {},
+        onSubmit(values, opts) {
+            const evt = opts?.evt;
+            if (evt && evt.target && evt.target.tagName === 'FORM') {
+                evt.target.submit();
+            } else if (evt?.target) {
+                evt.target.submit();
+            }
+        },
 
         onInvalidSubmit({ values, errors, results }) {
             setTimeout(() => {

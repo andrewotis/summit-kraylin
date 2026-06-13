@@ -48,6 +48,7 @@ class SubscriberDataGrid extends DataGrid
             'searchable' => true,
             'filterable' => true,
             'sortable' => true,
+            'closure' => fn ($row) => decrypt($row->person_name, false),
         ]);
 
         $this->addColumn([
@@ -58,14 +59,16 @@ class SubscriberDataGrid extends DataGrid
             'filterable' => true,
             'sortable' => true,
             'closure' => function ($row) {
-                if (! $row->person_emails) {
+                $decrypted = $row->person_emails ? decrypt($row->person_emails, false) : '';
+
+                if (! $decrypted) {
                     return '';
                 }
 
-                $emails = json_decode($row->person_emails, true);
+                $emails = json_decode($decrypted, true);
 
                 if (! is_array($emails)) {
-                    return $row->person_emails;
+                    return $decrypted;
                 }
 
                 $addresses = array_map(function ($email) {

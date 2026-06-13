@@ -26,7 +26,7 @@
     </v-email-component>
 @endif
 
-@pushOnce('scripts')
+@pushOnce('scripts', 'v-email-component')
     <script
         type="text/x-template"
         id="v-email-component-template"

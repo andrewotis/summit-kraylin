@@ -57,7 +57,7 @@ class PersonRepository extends Repository
     {
         $data = $this->sanitizeRequestedPersonData($data);
 
-        if (! empty($data['organization_name'])) {
+        if (! empty($data['organization_name']) && empty($data['organization_id'])) {
             $organization = $this->fetchOrCreateOrganizationByName($data['organization_name']);
 
             $data['organization_id'] = $organization->id;
@@ -87,7 +87,7 @@ class PersonRepository extends Repository
 
         $data['user_id'] = empty($data['user_id']) ? null : $data['user_id'];
 
-        if (! empty($data['organization_name'])) {
+        if (! empty($data['organization_name']) && empty($data['organization_id'])) {
             $organization = $this->fetchOrCreateOrganizationByName($data['organization_name']);
 
             $data['organization_id'] = $organization->id;
@@ -143,14 +143,30 @@ class PersonRepository extends Repository
      */
     public function fetchOrCreateOrganizationByName(string $organizationName)
     {
-        $organization = $this->organizationRepository->findOneWhere([
-            'name' => $organizationName,
-        ]);
+        $organizations = $this->organizationRepository->all();
 
-        return $organization ?: $this->organizationRepository->create([
+        foreach ($organizations as $organization) {
+            if (decrypt($organization->getRawOriginal('name'), false) === $organizationName) {
+                return $organization;
+            }
+        }
+
+        return $this->organizationRepository->create([
             'entity_type' => 'organizations',
             'name' => $organizationName,
         ]);
+    }
+
+    /**
+     * Get all known email addresses from all persons (decrypted).
+     */
+    public function getAllKnownEmails(): array
+    {
+        return $this->all()
+            ->flatMap(fn ($person) => collect($person->emails)->pluck('value')->all())
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**

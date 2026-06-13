@@ -28,11 +28,12 @@ class EmailDataGrid extends DataGrid
                 'emails.id',
                 'emails.name',
                 'emails.from',
+                'emails.reply_to',
                 'emails.subject',
                 'emails.reply',
                 'emails.is_read',
                 'emails.created_at',
-                'tags.name as tags',
+                DB::raw('ANY_VALUE(tags.name) as tags'),
                 DB::raw('COUNT(DISTINCT '.DB::getTablePrefix().'email_attachments.id) as attachments')
             )
             ->leftJoin('email_attachments', 'emails.id', '=', 'email_attachments.email_id')
@@ -67,15 +68,32 @@ class EmailDataGrid extends DataGrid
 
         $this->addColumn([
             'index' => 'name',
-            'label' => trans('admin::app.mail.index.datagrid.from'),
+            'label' => request('route') === 'sent'
+                ? trans('admin::app.mail.index.datagrid.to')
+                : trans('admin::app.mail.index.datagrid.from'),
             'type' => 'string',
             'sortable' => true,
             'searchable' => true,
             'filterable' => true,
             'closure' => function ($row) {
-                return $row->name
-                    ? trim($row->name, '"')
-                    : trim($row->from, '"');
+                if (request('route') === 'sent') {
+                    $replyTo = $row->reply_to ? decrypt($row->reply_to, false) : null;
+
+                    if ($replyTo) {
+                        $addresses = json_decode($replyTo, true);
+
+                        return is_array($addresses) ? implode(', ', $addresses) : $replyTo;
+                    }
+
+                    return '--';
+                }
+
+                $name = $row->name ? decrypt($row->name, false) : null;
+                $from = $row->from ? decrypt($row->from, false) : null;
+
+                return $name
+                    ? trim($name, '"')
+                    : trim($from, '"');
             },
         ]);
 
@@ -86,6 +104,7 @@ class EmailDataGrid extends DataGrid
             'sortable' => true,
             'searchable' => true,
             'filterable' => true,
+            'closure' => fn ($row) => $row->subject ? decrypt($row->subject, false) : '',
         ]);
 
         $this->addColumn([
@@ -95,6 +114,7 @@ class EmailDataGrid extends DataGrid
             'sortable' => true,
             'searchable' => true,
             'filterable' => true,
+            'closure' => fn ($row) => $row->reply ? decrypt($row->reply, false) : '',
         ]);
 
         $this->addColumn([

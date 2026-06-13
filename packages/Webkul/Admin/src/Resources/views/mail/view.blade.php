@@ -56,7 +56,7 @@
         {!! view_render_event('admin.mail.view.email-list.before', ['email' => $email]) !!}
     </div>
 
-    @pushOnce('scripts')
+    @pushOnce('scripts', 'v-email-list')
         <!-- Email List Template -->
         <script
             type="text/x-template"
@@ -382,6 +382,7 @@
                                                 ::data="reply_to"
                                                 :label="trans('admin::app.mail.view.to')"
                                                 :placeholder="trans('admin::app.mail.view.enter-mails')"
+                                                suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                             />
 
                                             <div class="absolute top-[9px] flex items-center gap-2 ltr:right-2 rtl:left-2">
@@ -417,6 +418,7 @@
                                                 input-rules="email"
                                                 :label="trans('admin::app.mail.view.cc')"
                                                 :placeholder="trans('admin::app.mail.view.enter-mails')"
+                                                suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                             />
 
                                             <x-admin::form.control-group.error control-name="cc" />
@@ -436,6 +438,7 @@
                                                 input-rules="email"
                                                 :label="trans('admin::app.mail.view.bcc')"
                                                 :placeholder="trans('admin::app.mail.view.enter-mails')"
+                                                suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                             />
 
                                             <x-admin::form.control-group.error control-name="bcc" />

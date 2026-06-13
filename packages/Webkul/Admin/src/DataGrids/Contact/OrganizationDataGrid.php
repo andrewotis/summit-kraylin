@@ -21,7 +21,7 @@ class OrganizationDataGrid extends DataGrid
      */
     public function prepareQueryBuilder(): Builder
     {
-        return DB::table('organizations')
+        $queryBuilder = DB::table('organizations')
             ->addSelect(
                 'organizations.id',
                 'organizations.name',
@@ -36,6 +36,8 @@ class OrganizationDataGrid extends DataGrid
         $this->addFilter('id', 'organizations.id');
 
         $this->addFilter('organization', 'organizations.name');
+
+        return $queryBuilder;
     }
 
     /**
@@ -58,6 +60,13 @@ class OrganizationDataGrid extends DataGrid
             'searchable' => true,
             'sortable' => true,
             'filterable' => true,
+            'closure' => function ($row) {
+                try {
+                    return decrypt($row->name, false);
+                } catch (\Exception $e) {
+                    return $row->name;
+                }
+            },
         ]);
 
         $this->addColumn([

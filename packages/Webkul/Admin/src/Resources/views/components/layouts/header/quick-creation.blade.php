@@ -205,6 +205,7 @@
                                                             input-rules="email"
                                                             :label="trans('admin::app.components.activities.actions.mail.to')"
                                                             :placeholder="trans('admin::app.components.activities.actions.mail.enter-emails')"
+                                                            suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                                         />
 
                                                         <div class="absolute top-[9px] flex items-center gap-2 ltr:right-2 rtl:left-2">
@@ -240,6 +241,7 @@
                                                             input-rules="email"
                                                             :label="trans('admin::app.components.activities.actions.mail.cc')"
                                                             :placeholder="trans('admin::app.components.activities.actions.mail.enter-emails')"
+                                                            suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                                         />
 
                                                         <x-admin::form.control-group.error control-name="cc" />
@@ -259,6 +261,7 @@
                                                             input-rules="email"
                                                             :label="trans('admin::app.components.activities.actions.mail.bcc')"
                                                             :placeholder="trans('admin::app.components.activities.actions.mail.enter-emails')"
+                                                            suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                                         />
 
                                                         <x-admin::form.control-group.error control-name="bcc" />

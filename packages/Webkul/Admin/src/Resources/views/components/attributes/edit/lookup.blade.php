@@ -26,7 +26,7 @@
     </v-lookup-component>
 @endif
 
-@pushOnce('scripts')
+@pushOnce('scripts', 'v-lookup-component')
     <script
         type="text/x-template"
         id="v-lookup-component-template"

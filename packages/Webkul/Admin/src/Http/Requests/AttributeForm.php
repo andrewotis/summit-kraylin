@@ -73,13 +73,13 @@ class AttributeForm extends FormRequest
                 $validations = [
                     $attribute->code => [$attribute->is_required ? 'required' : 'nullable'],
                     $attribute->code.'.*.value' => [$attribute->is_required ? 'required' : 'nullable', 'email'],
-                    $attribute->code.'.*.label' => $attribute->is_required ? 'required' : 'nullable',
+                    $attribute->code.'.*.label' => 'nullable',
                 ];
             } elseif ($attribute->type == 'phone') {
                 $validations = [
                     $attribute->code => [$attribute->is_required ? 'required' : 'nullable'],
                     $attribute->code.'.*.value' => [$attribute->is_required ? 'required' : 'nullable'],
-                    $attribute->code.'.*.label' => $attribute->is_required ? 'required' : 'nullable',
+                    $attribute->code.'.*.label' => 'nullable',
                 ];
             } else {
                 $validations[$attribute->code] = [$attribute->is_required ? 'required' : 'nullable'];

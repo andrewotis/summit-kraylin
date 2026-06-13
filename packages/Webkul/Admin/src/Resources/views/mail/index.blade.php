@@ -49,7 +49,7 @@
         </v-mail>
     </div>
 
-    @pushOnce('scripts')
+    @pushOnce('scripts', 'v-mail')
         <script
             type="text/x-template"
             id="v-mail-template"
@@ -407,6 +407,7 @@
                                         :label="trans('admin::app.mail.index.mail.to')"
                                         :placeholder="trans('admin::app.mail.index.mail.enter-emails')"
                                         ::allow-duplicates="false"
+                                        suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                     />
 
                                     <div class="absolute top-[9px] flex items-center gap-2 ltr:right-2 rtl:left-2">
@@ -443,6 +444,7 @@
                                         ::data="draft.cc"
                                         :label="trans('admin::app.mail.index.mail.cc')"
                                         :placeholder="trans('admin::app.mail.index.mail.enter-emails')"
+                                        suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                     />
 
                                     <x-admin::form.control-group.error control-name="cc" />
@@ -463,6 +465,7 @@
                                         ::data="draft.bcc"
                                         :label="trans('admin::app.mail.index.mail.bcc')"
                                         :placeholder="trans('admin::app.mail.index.mail.enter-emails')"
+                                        suggestions-url="{{ route('admin.mail.contact_emails') }}"
                                     />
 
                                     <x-admin::form.control-group.error control-name="bcc" />

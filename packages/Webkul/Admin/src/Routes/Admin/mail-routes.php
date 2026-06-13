@@ -12,6 +12,8 @@ Route::prefix('mail')->middleware('sanitize_url')->group(function () {
 
         Route::get('attachment-download/{id?}', 'download')->name('admin.mail.attachment_download');
 
+        Route::get('contact-emails', 'contactEmails')->name('admin.mail.contact_emails');
+
         Route::get('{route?}', 'index')->name('admin.mail.index');
 
         Route::get('{route}/{id}', 'view')->name('admin.mail.view');

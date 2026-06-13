@@ -123,21 +123,43 @@ class AttributeValueRepository extends Repository
      */
     public function isValueUnique($entityId, $entityType, $attribute, $value)
     {
-        $query = $this->resetScope()->model
-            ->where('attribute_id', $attribute->id)
-            ->where('entity_type', $entityType)
-            ->where('entity_id', '!=', $entityId);
+        $attributeTypeField = $this->model::$attributeTypeFields[$attribute->type];
 
         /**
-         * If the attribute type is email or phone, check the JSON value.
+         * For email and phone types, json_value is encrypted so we need to
+         * decrypt and compare in PHP rather than using JSON_CONTAINS.
          */
         if (in_array($attribute->type, ['email', 'phone'])) {
-            $query->whereJsonContains($this->model::$attributeTypeFields[$attribute->type], [['value' => $value]]);
-        } else {
-            $query->where($this->model::$attributeTypeFields[$attribute->type], $value);
+            $existingValues = $this->resetScope()->model
+                ->where('attribute_id', $attribute->id)
+                ->where('entity_type', $entityType)
+                ->where('entity_id', '!=', $entityId)
+                ->whereNotNull($attributeTypeField)
+                ->get();
+
+            foreach ($existingValues as $existingValue) {
+                $decryptedValues = $existingValue->{$attributeTypeField};
+
+                if (! is_array($decryptedValues)) {
+                    continue;
+                }
+
+                foreach ($decryptedValues as $item) {
+                    if (isset($item['value']) && $item['value'] === $value) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
-        return $query->get()->count() ? false : true;
+        return $this->resetScope()->model
+            ->where('attribute_id', $attribute->id)
+            ->where('entity_type', $entityType)
+            ->where('entity_id', '!=', $entityId)
+            ->where($attributeTypeField, $value)
+            ->exists() ? false : true;
     }
 
     /**
