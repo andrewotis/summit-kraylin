@@ -241,7 +241,7 @@
 
                     if (this.showPopup) {
                         if (! this.searchTerm.trim()) {
-                            this.fetchResults('', 5);
+                            this.fetchResults('', 50);
                         }
 
                         this.$nextTick(() => this.$refs.searchInput.focus());
@@ -278,7 +278,7 @@
                     const query = this.searchTerm.trim();
 
                     if (! query) {
-                        this.fetchResults('', 5);
+                        this.fetchResults('', 50);
 
                         return;
                     }

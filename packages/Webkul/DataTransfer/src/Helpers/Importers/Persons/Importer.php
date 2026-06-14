@@ -252,12 +252,10 @@ class Importer extends AbstractImporter
          * Load person storage with batch emails.
          */
         $emails = collect(Arr::pluck($batch->data, 'emails'))
-            ->map(function ($emails) {
-                $emails = json_decode($emails, true);
+            ->map(function ($value) {
+                $normalized = $this->normalizeField($value);
 
-                foreach ($emails as $email) {
-                    return $email['value'];
-                }
+                return $normalized[0]['value'] ?? null;
             });
 
         $this->personStorage->load($emails->toArray());
@@ -294,12 +292,10 @@ class Importer extends AbstractImporter
          * Load person storage with batch email.
          */
         $emails = collect(Arr::pluck($batch->data, 'emails'))
-            ->map(function ($emails) {
-                $emails = json_decode($emails, true);
+            ->map(function ($value) {
+                $normalized = $this->normalizeField($value);
 
-                foreach ($emails as $email) {
-                    return $email['value'];
-                }
+                return $normalized[0]['value'] ?? null;
             });
 
         $this->personStorage->load($emails->toArray());
@@ -312,6 +308,8 @@ class Importer extends AbstractImporter
          * Prepare persons for import.
          */
         foreach ($batch->data as $rowData) {
+            $rowData = $this->parsedRowData($rowData);
+
             $this->preparePersons($rowData, $persons);
 
             $this->prepareAttributeValues($rowData, $attributeValues);
@@ -332,9 +330,7 @@ class Importer extends AbstractImporter
         $emails = $this->prepareEmail($rowData['emails']);
 
         foreach ($emails as $email) {
-            $contactNumber = json_decode($rowData['contact_numbers'], true);
-
-            $rowData['unique_id'] = "{$rowData['user_id']}|{$rowData['organization_id']}|{$email}|{$contactNumber[0]['value']}";
+            $rowData['unique_id'] = "{$rowData['user_id']}|{$rowData['organization_id']}|{$email}|{$rowData['contact_numbers'][0]['value'] ?? ''}";
 
             if ($this->isEmailExist($email)) {
                 $persons['update'][$email] = $rowData;
@@ -455,13 +451,33 @@ class Importer extends AbstractImporter
     }
 
     /**
+     * Normalize a CSV field that accepts either a JSON array
+     * `[{"label":"work","value":"..."}]` or a bare value.
+     * Bare values get wrapped with label "work".
+     */
+    private function normalizeField(?string $value): array
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        return [['label' => 'work', 'value' => $value]];
+    }
+
+    /**
      * Get parsed email and phone.
      */
     private function parsedRowData(array $rowData): array
     {
-        $rowData['emails'] = json_decode($rowData['emails'], true);
+        $rowData['emails'] = $this->normalizeField($rowData['emails'] ?? null);
 
-        $rowData['contact_numbers'] = json_decode($rowData['contact_numbers'], true);
+        $rowData['contact_numbers'] = $this->normalizeField($rowData['contact_numbers'] ?? null);
 
         return $rowData;
     }
@@ -469,24 +485,8 @@ class Importer extends AbstractImporter
     /**
      * Prepare email from row data.
      */
-    private function prepareEmail(array|string $emails): Collection
+    private function prepareEmail(array $emails): Collection
     {
-        static $cache = [];
-
-        return collect($emails)
-            ->map(function ($emailString) use (&$cache) {
-                if (isset($cache[$emailString])) {
-                    return $cache[$emailString];
-                }
-
-                $decoded = json_decode($emailString, true);
-
-                $emailValue = is_array($decoded)
-                    && isset($decoded[0]['value'])
-                    ? $decoded[0]['value']
-                    : null;
-
-                return $cache[$emailString] = $emailValue;
-            });
+        return collect($emails)->pluck('value');
     }
 }

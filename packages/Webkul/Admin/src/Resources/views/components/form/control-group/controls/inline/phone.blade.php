@@ -30,15 +30,15 @@
                     :style="{ 'text-align': position }"
                 >
                     <span class="cursor-pointer truncate rounded">
-                        @{{ valueLabel ? valueLabel : inputValue.map(item => `${item.value}(${item.label})`).join(', ').length > 20 ? inputValue.map(item => `${item.value}(${item.label})`).join(', ').substring(0, 20) + '...' : inputValue.map(item => `${item.value}(${item.label})`).join(', ') }}
+                        @{{ valueLabel ? valueLabel : displayValue.length > 20 ? displayValue.substring(0, 20) + '...' : displayValue }}
                     </span>
 
                     <div
                         class="absolute bottom-0 mb-5 hidden flex-col group-hover:flex"
-                        v-if="inputValue.map(item => `${item.value}(${item.label})`).join(', ').length > 20"
+                        v-if="displayValue.length > 20"
                     >
                         <span class="whitespace-no-wrap relative z-10 rounded-md bg-black px-4 py-2 text-xs leading-none text-white shadow-lg dark:bg-white dark:text-gray-900">
-                            @{{ inputValue.map(item => `${item.value}(${item.label})`).join(', \n') }}
+                            @{{ displayValue }}
                         </span>
 
                         <div class="-mt-2 ml-4 h-3 w-3 rotate-45 bg-black dark:bg-white"></div>
@@ -231,6 +231,12 @@
             },
 
             computed: {
+                displayValue() {
+                    return (this.inputValue || [])
+                        .map(item => item.label ? `${item.value}(${item.label})` : item.value)
+                        .join(', ');
+                },
+
                 /**
                  * Get the validation rules.
                  * 

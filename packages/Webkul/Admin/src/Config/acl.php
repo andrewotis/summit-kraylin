@@ -612,10 +612,15 @@ return [
         'route' => ['admin.settings.mailing_lists.subscribers.edit', 'admin.settings.mailing_lists.subscribers.update'],
         'sort' => 2,
     ], [
+        'key' => 'settings.other_settings.mailing_lists.subscribers.toggle',
+        'name' => 'admin::app.acl.toggle',
+        'route' => ['admin.settings.mailing_lists.subscribers.toggle', 'admin.settings.mailing_lists.subscribers.mass_toggle'],
+        'sort' => 3,
+    ], [
         'key' => 'settings.other_settings.mailing_lists.subscribers.delete',
         'name' => 'admin::app.acl.delete',
         'route' => ['admin.settings.mailing_lists.subscribers.delete', 'admin.settings.mailing_lists.subscribers.mass_delete'],
-        'sort' => 3,
+        'sort' => 4,
     ], [
         'key' => 'configuration',
         'name' => 'admin::app.acl.configuration',

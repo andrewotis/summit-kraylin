@@ -8,7 +8,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Event;
 use Illuminate\View\View;
-use Prettus\Repository\Criteria\RequestCriteria;
 use Webkul\Admin\DataGrids\Contact\PersonDataGrid;
 use Webkul\Admin\Http\Controllers\Controller;
 use Webkul\Admin\Http\Requests\AttributeForm;
@@ -119,23 +118,56 @@ class PersonController extends Controller
      */
     public function search(): JsonResource
     {
-        $personRepository = $this->personRepository
-            ->pushCriteria(app(RequestCriteria::class));
+        $personRepository = $this->personRepository;
 
-        if ($searchTerm = request()->query('query')) {
-            $personRepository = $personRepository->scopeQuery(function ($query) use ($searchTerm) {
-                return $query->where(function ($q) use ($searchTerm) {
-                    $q->where('name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('emails', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('contact_numbers', 'like', '%'.$searchTerm.'%');
+        if ($userIds = bouncer()->getAuthorizedUserIds()) {
+            $personRepository = $personRepository->scopeQuery(function ($query) use ($userIds) {
+                return $query->where(function ($q) use ($userIds) {
+                    $q->whereIn('user_id', $userIds)->orWhereNull('user_id');
                 });
             });
         }
 
-        if ($userIds = bouncer()->getAuthorizedUserIds()) {
-            $persons = $personRepository->findWhereIn('user_id', $userIds);
-        } else {
-            $persons = $personRepository->all();
+        $persons = $personRepository->all();
+
+        $searchTerm = request()->query('query');
+
+        if ($searchTerm) {
+            $searchTermLower = mb_strtolower($searchTerm);
+
+            $persons = $persons->filter(function ($person) use ($searchTermLower) {
+                if (mb_strtolower($person->name) === $searchTermLower) {
+                    return true;
+                }
+
+                if (mb_strpos(mb_strtolower($person->name), $searchTermLower) !== false) {
+                    return true;
+                }
+
+                foreach ((array) $person->emails as $email) {
+                    $value = $email['value'] ?? '';
+
+                    if (mb_strpos(mb_strtolower($value), $searchTermLower) !== false) {
+                        return true;
+                    }
+                }
+
+                foreach ((array) $person->contact_numbers as $number) {
+                    $value = $number['value'] ?? '';
+
+                    if (mb_strpos(mb_strtolower($value), $searchTermLower) !== false) {
+                        return true;
+                    }
+                }
+
+                return false;
+            })->values();
+        }
+
+        $limit = request()->integer('limit', 0);
+
+        if ($limit > 0) {
+            $persons = $persons->take($limit);
         }
 
         return PersonResource::collection($persons);

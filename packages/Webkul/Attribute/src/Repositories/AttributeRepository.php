@@ -144,8 +144,26 @@ class AttributeRepository extends Repository
             return $userRepository->where('users.name', 'like', '%'.urldecode($query).'%')->get();
         }
 
-        return app($lookup['repository'])->findWhere([
-            [$lookup['label_column'] ?? 'name', 'like', '%'.urldecode($query).'%'],
+        $repository = app($lookup['repository']);
+        $model = $repository->getModel();
+        $labelColumn = $lookup['label_column'] ?? 'name';
+
+        $casts = $model->getCasts();
+
+        if (isset($casts[$labelColumn]) && str_starts_with($casts[$labelColumn], 'encrypted')) {
+            $allResults = $repository->all($columns);
+
+            if (! $query) {
+                return $allResults;
+            }
+
+            $query = urldecode($query);
+
+            return $allResults->filter(fn ($item) => stripos($item->name, $query) !== false)->values();
+        }
+
+        return $repository->findWhere([
+            [$labelColumn, 'like', '%'.urldecode($query).'%'],
         ], $columns);
     }
 

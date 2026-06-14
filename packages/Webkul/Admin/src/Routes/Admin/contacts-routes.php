@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Webkul\Admin\Http\Controllers\Contact\OrganizationController;
 use Webkul\Admin\Http\Controllers\Contact\Persons\ActivityController;
 use Webkul\Admin\Http\Controllers\Contact\Persons\PersonController;
+use Webkul\Admin\Http\Controllers\Contact\Persons\MailingListController;
 use Webkul\Admin\Http\Controllers\Contact\Persons\TagController;
 
 Route::prefix('contacts')->group(function () {
@@ -43,6 +44,17 @@ Route::prefix('contacts')->group(function () {
          */
         Route::controller(ActivityController::class)->prefix('{id}/activities')->group(function () {
             Route::get('', 'index')->name('admin.contacts.persons.activities.index');
+        });
+
+        /**
+         * Mailing list routes.
+         */
+        Route::controller(MailingListController::class)->prefix('{id}/mailing-lists')->group(function () {
+            Route::get('', 'index')->name('admin.contacts.persons.mailing_lists.index');
+
+            Route::post('{mailingListId}', 'store')->name('admin.contacts.persons.mailing_lists.store');
+
+            Route::delete('{mailingListId}', 'destroy')->name('admin.contacts.persons.mailing_lists.destroy');
         });
     });
 

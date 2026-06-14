@@ -85,6 +85,14 @@
                             <p>@{{ record.created_at }}</p>
 
                             <div class="flex justify-end">
+                                <a @click="performAction(record.actions.find(action => action.index === 'toggle'))">
+                                    <span
+                                        :class="record.actions.find(action => action.index === 'toggle')?.icon"
+                                        class="cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-200 dark:hover:bg-gray-800 max-sm:place-self-center"
+                                    >
+                                    </span>
+                                </a>
+
                                 <a @click="selectedSubscriber=true; editModal(record.actions.find(action => action.index === 'edit')?.url)">
                                     <span
                                         :class="record.actions.find(action => action.index === 'edit')?.icon"
@@ -129,6 +137,14 @@
                                         class="flex w-full items-center justify-end"
                                         v-if="available.actions.length"
                                     >
+                                        <a @click="performAction(record.actions.find(action => action.index === 'toggle'))">
+                                            <span
+                                                :class="record.actions.find(action => action.index === 'toggle')?.icon"
+                                                class="cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-200 dark:hover:bg-gray-800 max-sm:place-self-center"
+                                            >
+                                            </span>
+                                        </a>
+
                                         <a @click="selectedSubscriber=true; editModal(record.actions.find(action => action.index === 'edit')?.url)">
                                             <span
                                                 :class="record.actions.find(action => action.index === 'edit')?.icon"

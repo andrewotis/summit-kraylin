@@ -115,6 +115,16 @@ class SubscriberDataGrid extends DataGrid
             ]);
         }
 
+        if (bouncer()->hasPermission('settings.other_settings.mailing_lists.subscribers.toggle')) {
+            $this->addAction([
+                'index' => 'toggle',
+                'icon' => 'icon-tick',
+                'title' => trans('admin::app.settings.mailing-lists.subscribers.datagrid.toggle'),
+                'method' => 'PUT',
+                'url' => fn ($row) => route('admin.settings.mailing_lists.subscribers.toggle', [$row->mailing_list_id, $row->id]),
+            ]);
+        }
+
         if (bouncer()->hasPermission('settings.other_settings.mailing_lists.subscribers.delete')) {
             $this->addAction([
                 'index' => 'delete',
@@ -128,6 +138,13 @@ class SubscriberDataGrid extends DataGrid
 
     public function prepareMassActions(): void
     {
+        $this->addMassAction([
+            'icon' => 'icon-tick',
+            'title' => trans('admin::app.settings.mailing-lists.subscribers.datagrid.toggle'),
+            'method' => 'POST',
+            'url' => route('admin.settings.mailing_lists.subscribers.mass_toggle', request()->route('id')),
+        ]);
+
         $this->addMassAction([
             'icon' => 'icon-delete',
             'title' => trans('admin::app.settings.mailing-lists.subscribers.datagrid.delete'),

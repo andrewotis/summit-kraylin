@@ -20,6 +20,18 @@
             </div>
 
             <div class="flex items-center gap-x-2.5">
+                <!-- Import Link -->
+                @if (bouncer()->hasPermission('settings.automation.data_transfer.imports.create'))
+                    <a
+                        href="{{ route('admin.settings.data_transfer.imports.create') }}"
+                        class="transparent-button hover:bg-gray-200 dark:text-white dark:hover:bg-gray-800"
+                    >
+                        <span class="icon-import text-xl text-gray-600"></span>
+
+                        Import People
+                    </a>
+                @endif
+
                 <div class="flex items-center gap-x-2.5">
                     {!! view_render_event('admin.organizations.index.create_button.before') !!}
 

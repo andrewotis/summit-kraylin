@@ -24,6 +24,7 @@ class Campaign
             ->leftJoin('email_templates', 'marketing_campaigns.marketing_template_id', 'email_templates.id')
             ->select('marketing_campaigns.*')
             ->where('marketing_campaigns.status', 1)
+            ->whereNull('marketing_campaigns.sent_at')
             ->where(function ($query) {
                 $query->where('marketing_events.date', Carbon::now()->format('Y-m-d'))
                     ->orWhereNull('marketing_events.date');
@@ -44,6 +45,10 @@ class Campaign
                     Mail::queue(new CampaignMail($email, $campaign, $person));
                 }
             }
+
+            $this->campaignRepository->update([
+                'sent_at' => now(),
+            ], $campaign->id);
         }
     }
 

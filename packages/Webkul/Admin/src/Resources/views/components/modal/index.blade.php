@@ -90,7 +90,7 @@
                 >
                     <div class="flex min-h-full items-center justify-center max-md:p-4">
                         <div
-                            class="box-shadow z-[999] w-full overflow-hidden rounded-lg bg-white dark:bg-gray-900 sm:absolute"
+                            class="box-shadow z-[999] w-full overflow-visible rounded-lg bg-white dark:bg-gray-900 sm:absolute"
                             :class="[finalPositionClass, sizeClass]"
                         >
                             <!-- Header Slot -->

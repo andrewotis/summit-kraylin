@@ -65,11 +65,11 @@ class ActivityController extends Controller
                 'participants' => [],
                 'location' => null,
                 'additional' => [
-                    'folders' => json_decode($email->folders),
-                    'from' => json_decode($email->from),
-                    'to' => json_decode($email->reply_to),
-                    'cc' => json_decode($email->cc),
-                    'bcc' => json_decode($email->bcc),
+                    'folders' => json_decode($email->folders) ?? [],
+                    'from' => json_decode($email->from) ?? [],
+                    'to' => json_decode($email->reply_to) ?? [],
+                    'cc' => json_decode($email->cc) ?? [],
+                    'bcc' => json_decode($email->bcc) ?? [],
                 ],
                 'files' => $this->attachmentRepository->findWhere(['email_id' => $email->id])->map(function ($attachment) {
                     return (object) [

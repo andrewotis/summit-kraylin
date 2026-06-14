@@ -370,9 +370,13 @@ Route::prefix('settings')->group(function () {
 
             Route::put('edit/{subscriberId}', 'update')->name('admin.settings.mailing_lists.subscribers.update');
 
+            Route::put('toggle/{subscriberId}', 'toggle')->name('admin.settings.mailing_lists.subscribers.toggle');
+
             Route::delete('{subscriberId}', 'destroy')->name('admin.settings.mailing_lists.subscribers.delete');
 
             Route::post('mass-destroy', 'massDestroy')->name('admin.settings.mailing_lists.subscribers.mass_delete');
+
+            Route::post('mass-toggle', 'massToggle')->name('admin.settings.mailing_lists.subscribers.mass_toggle');
         });
     });
 

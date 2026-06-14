@@ -14,10 +14,6 @@ return new class extends Migration
             $table->longText('contact_numbers')->change();
         });
 
-        Schema::table('organizations', function (Blueprint $table) {
-            $table->longText('address')->change();
-        });
-
         DB::table('persons')->whereNotNull('emails')->lazyById()->each(function ($person) {
             try {
                 decrypt($person->emails);
@@ -35,16 +31,6 @@ return new class extends Migration
                 DB::table('persons')
                     ->where('id', $person->id)
                     ->update(['contact_numbers' => encrypt($person->contact_numbers)]);
-            }
-        });
-
-        DB::table('organizations')->whereNotNull('address')->lazyById()->each(function ($org) {
-            try {
-                decrypt($org->address);
-            } catch (Exception $e) {
-                DB::table('organizations')
-                    ->where('id', $org->id)
-                    ->update(['address' => encrypt($org->address)]);
             }
         });
     }
@@ -71,23 +57,9 @@ return new class extends Migration
             }
         });
 
-        DB::table('organizations')->whereNotNull('address')->lazyById()->each(function ($org) {
-            try {
-                $decrypted = decrypt($org->address);
-                DB::table('organizations')
-                    ->where('id', $org->id)
-                    ->update(['address' => $decrypted]);
-            } catch (Exception $e) {
-            }
-        });
-
         Schema::table('persons', function (Blueprint $table) {
             $table->json('emails')->change();
             $table->json('contact_numbers')->change();
-        });
-
-        Schema::table('organizations', function (Blueprint $table) {
-            $table->json('address')->change();
         });
     }
 };

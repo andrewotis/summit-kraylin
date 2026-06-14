@@ -20,6 +20,44 @@ class SubscriberController extends Controller
         protected PersonRepository $personRepository,
     ) {}
 
+    public function toggle(int $mailingListId, int $id): JsonResponse
+    {
+        $subscriber = $this->subscriberRepository->findOrFail($id);
+
+        $subscriber = $this->subscriberRepository->update([
+            'is_subscribed' => ! $subscriber->is_subscribed,
+        ], $id);
+
+        $message = $subscriber->is_subscribed
+            ? trans('admin::app.settings.mailing-lists.subscribers.subscribed-success')
+            : trans('admin::app.settings.mailing-lists.subscribers.unsubscribed-success');
+
+        return response()->json([
+            'message' => $message,
+        ]);
+    }
+
+    public function massToggle(MassDestroyRequest $massDestroyRequest): JsonResponse
+    {
+        $indices = $massDestroyRequest->input('indices');
+
+        foreach ($indices as $id) {
+            $subscriber = $this->subscriberRepository->find($id);
+
+            if (! $subscriber) {
+                continue;
+            }
+
+            $this->subscriberRepository->update([
+                'is_subscribed' => ! $subscriber->is_subscribed,
+            ], $id);
+        }
+
+        return response()->json([
+            'message' => trans('admin::app.settings.mailing-lists.subscribers.mass-toggle-success'),
+        ]);
+    }
+
     public function index(int $mailingListId): View|JsonResponse
     {
         $mailingList = $this->mailingListRepository->findOrFail($mailingListId);

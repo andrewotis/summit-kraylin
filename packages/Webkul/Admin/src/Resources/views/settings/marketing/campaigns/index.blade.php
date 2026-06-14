@@ -104,6 +104,49 @@
                                 <!-- Subject -->
                                 <p>@{{ record.subject }}</p>
 
+                                <!-- Event -->
+                                <p>
+                                    <template v-if="record.marketing_event_id">
+                                        <a
+                                            :href="'{{ route('admin.settings.marketing.events.index') }}'"
+                                            class="text-brandColor hover:underline"
+                                        >
+                                            @{{ record.event_date }} (@{{ record.event_name }})
+                                        </a>
+                                    </template>
+                                    <template v-else>
+                                        —
+                                    </template>
+                                </p>
+
+                                <!-- Email Template -->
+                                <p>
+                                    <a
+                                        :href="record.marketing_template_id ? '{{ url('/admin/settings/email-templates/edit') }}/' + record.marketing_template_id : 'javascript:void(0)'"
+                                        :class="record.marketing_template_id ? 'text-brandColor hover:underline' : ''"
+                                    >
+                                        @{{ record.email_template_name }}
+                                    </a>
+                                </p>
+
+                                <!-- Mailing List -->
+                                <p>
+                                    <template v-if="record.mailing_list_id">
+                                        <a
+                                            :href="'{{ route('admin.settings.mailing_lists.index') }}'"
+                                            class="text-brandColor hover:underline"
+                                        >
+                                            @{{ record.mailing_list_name }}
+                                        </a>
+                                    </template>
+                                    <template v-else>
+                                        @{{ '@lang('admin::app.settings.marketing.campaigns.index.create.all-persons')' }}
+                                    </template>
+                                </p>
+
+                                <!-- Recipients -->
+                                <p>@{{ record.recipients_count }}</p>
+
                                 <!-- Status -->
                                 <span
                                     :class="record.status == 1 ? 'label-active' : 'label-inactive'"
@@ -113,6 +156,18 @@
 
                                 <!-- Actions -->
                                 <div class="flex justify-end">
+                                    <a
+                                        :href="record.actions.find(action => action.index === 'subscribers')?.url"
+                                        :class="record.actions.find(action => action.index === 'subscribers')?.url === '#' ? 'pointer-events-none opacity-50' : ''"
+                                        :title="'@lang('admin::app.settings.marketing.campaigns.index.datagrid.subscribers')'"
+                                    >
+                                        <span
+                                            :class="record.actions.find(action => action.index === 'subscribers')?.icon"
+                                            class="cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-200 dark:hover:bg-gray-800 max-sm:place-self-center"
+                                        >
+                                        </span>
+                                    </a>
+
                                     @if (bouncer()->hasPermission('settings.automation.campaigns.edit'))
                                         <a @click.prevent="actionType = 'edit';edit(record)">
                                             <span
@@ -166,6 +221,18 @@
                                             class="flex w-full items-center justify-end"
                                             v-if="available.actions.length"
                                         >
+                                            <a
+                                                :href="record.actions.find(action => action.index === 'subscribers')?.url"
+                                                :class="record.actions.find(action => action.index === 'subscribers')?.url === '#' ? 'pointer-events-none opacity-50' : ''"
+                                                :title="'@lang('admin::app.settings.marketing.campaigns.index.datagrid.subscribers')'"
+                                            >
+                                                <span
+                                                    :class="record.actions.find(action => action.index === 'subscribers')?.icon"
+                                                    class="cursor-pointer rounded-md p-1.5 text-2xl transition-all hover:bg-gray-200 dark:hover:bg-gray-800 max-sm:place-self-center"
+                                                >
+                                                </span>
+                                            </a>
+
                                             @if (bouncer()->hasPermission('settings.automation.campaigns.edit'))
                                                 <a @click.prevent="actionType = 'edit';edit(record)">
                                                     <span

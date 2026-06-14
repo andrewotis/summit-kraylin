@@ -13,25 +13,48 @@ return [
     ],
 
     /**
-     * Leads.
+     * People (was Contacts).
      */
     [
-        'key' => 'leads',
-        'name' => 'admin::app.layouts.leads',
-        'route' => 'admin.leads.index',
+        'key' => 'contacts',
+        'name' => 'admin::app.layouts.contacts',
+        'route' => 'admin.contacts.persons.index',
         'sort' => 2,
-        'icon-class' => 'icon-leads',
+        'icon-class' => 'icon-contact',
+    ], [
+        'key' => 'contacts.persons',
+        'name' => 'admin::app.layouts.persons',
+        'route' => 'admin.contacts.persons.index',
+        'sort' => 1,
+        'icon-class' => '',
+    ], [
+        'key' => 'contacts.organizations',
+        'name' => 'admin::app.layouts.organizations',
+        'route' => 'admin.contacts.organizations.index',
+        'sort' => 2,
+        'icon-class' => '',
     ],
 
     /**
-     * Quotes.
+     * Campaigns.
      */
     [
-        'key' => 'quotes',
-        'name' => 'admin::app.layouts.quotes',
-        'route' => 'admin.quotes.index',
+        'key' => 'campaigns',
+        'name' => 'admin::app.layouts.campaigns',
+        'route' => 'admin.settings.marketing.campaigns.index',
         'sort' => 3,
-        'icon-class' => 'icon-quote',
+        'icon-class' => 'icon-sent',
+    ],
+
+    /**
+     * Mailing Lists.
+     */
+    [
+        'key' => 'mailing_lists',
+        'name' => 'admin::app.layouts.mailing-lists',
+        'route' => 'admin.settings.mailing_lists.index',
+        'sort' => 4,
+        'icon-class' => 'icon-list',
     ],
 
     /**
@@ -42,7 +65,7 @@ return [
         'name' => 'admin::app.layouts.mail.title',
         'route' => 'admin.mail.index',
         'params' => ['route' => 'inbox'],
-        'sort' => 4,
+        'sort' => 5,
         'icon-class' => 'icon-mail',
     ], [
         'key' => 'mail.inbox',
@@ -82,48 +105,38 @@ return [
     ],
 
     /**
-     * Activities.
+     * Sales (Leads, Quotes, Products, Activities).
      */
     [
-        'key' => 'activities',
-        'name' => 'admin::app.layouts.activities',
-        'route' => 'admin.activities.index',
-        'sort' => 5,
-        'icon-class' => 'icon-activity',
-    ],
-
-    /**
-     * Contacts.
-     */
-    [
-        'key' => 'contacts',
-        'name' => 'admin::app.layouts.contacts',
-        'route' => 'admin.contacts.persons.index',
+        'key' => 'sales',
+        'name' => 'admin::app.layouts.sales',
+        'route' => 'admin.leads.index',
         'sort' => 6,
-        'icon-class' => 'icon-contact',
+        'icon-class' => 'icon-dollar',
     ], [
-        'key' => 'contacts.persons',
-        'name' => 'admin::app.layouts.persons',
-        'route' => 'admin.contacts.persons.index',
+        'key' => 'sales.leads',
+        'name' => 'admin::app.layouts.leads',
+        'route' => 'admin.leads.index',
         'sort' => 1,
         'icon-class' => '',
     ], [
-        'key' => 'contacts.organizations',
-        'name' => 'admin::app.layouts.organizations',
-        'route' => 'admin.contacts.organizations.index',
+        'key' => 'sales.quotes',
+        'name' => 'admin::app.layouts.quotes',
+        'route' => 'admin.quotes.index',
         'sort' => 2,
         'icon-class' => '',
-    ],
-
-    /**
-     * Products.
-     */
-    [
-        'key' => 'products',
+    ], [
+        'key' => 'sales.products',
         'name' => 'admin::app.layouts.products',
         'route' => 'admin.products.index',
-        'sort' => 7,
-        'icon-class' => 'icon-product',
+        'sort' => 3,
+        'icon-class' => '',
+    ], [
+        'key' => 'sales.activities',
+        'name' => 'admin::app.layouts.activities',
+        'route' => 'admin.activities.index',
+        'sort' => 4,
+        'icon-class' => '',
     ],
 
     /**
@@ -234,13 +247,6 @@ return [
         'sort' => 2,
         'icon-class' => 'icon-calendar',
     ], [
-        'key' => 'settings.automation.campaigns',
-        'name' => 'admin::app.layouts.campaigns',
-        'info' => 'admin::app.layouts.campaigns-info',
-        'route' => 'admin.settings.marketing.campaigns.index',
-        'sort' => 2,
-        'icon-class' => 'icon-note',
-    ], [
         'key' => 'settings.automation.webhooks',
         'name' => 'admin::app.layouts.webhooks',
         'info' => 'admin::app.layouts.webhooks-info',
@@ -275,13 +281,6 @@ return [
         'route' => 'admin.settings.tags.index',
         'sort' => 1,
         'icon-class' => 'icon-settings-tag',
-    ], [
-        'key' => 'settings.other_settings.mailing_lists',
-        'name' => 'admin::app.layouts.mailing-lists',
-        'info' => 'admin::app.layouts.mailing-lists-info',
-        'route' => 'admin.settings.mailing_lists.index',
-        'sort' => 2,
-        'icon-class' => 'icon-settings-mail',
     ],
 
     /**

@@ -15,6 +15,8 @@ return new class extends Migration
             $table->text('cc')->nullable()->change();
             $table->text('bcc')->nullable()->change();
             $table->text('reference_ids')->nullable()->change();
+            $table->text('subject')->nullable()->change();
+            $table->text('name')->nullable()->change();
         });
     }
 
@@ -27,6 +29,8 @@ return new class extends Migration
             $table->json('cc')->nullable()->change();
             $table->json('bcc')->nullable()->change();
             $table->json('reference_ids')->nullable()->change();
+            $table->string('subject', 255)->nullable()->change();
+            $table->string('name', 255)->nullable()->change();
         });
     }
 };

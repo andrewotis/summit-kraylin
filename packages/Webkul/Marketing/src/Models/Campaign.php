@@ -15,10 +15,15 @@ class Campaign extends Model implements CampaignContract
         'name',
         'subject',
         'status',
+        'sent_at',
         'marketing_template_id',
         'marketing_event_id',
         'mailing_list_id',
         'spooling',
+    ];
+
+    protected $casts = [
+        'sent_at' => 'datetime',
     ];
 
     public function email_template()
