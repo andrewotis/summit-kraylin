@@ -81,6 +81,7 @@ class ActivityDataGrid extends DataGrid
             'searchable' => true,
             'filterable' => true,
             'sortable' => true,
+            'closure' => fn ($row) => decrypt($row->title, false),
         ]);
 
         $this->addColumn([
@@ -109,6 +110,7 @@ class ActivityDataGrid extends DataGrid
             'index' => 'comment',
             'label' => trans('admin::app.activities.index.datagrid.comment'),
             'type' => 'string',
+            'closure' => fn ($row) => $row->comment ? decrypt($row->comment, false) : null,
         ]);
 
         $this->addColumn([
@@ -133,7 +135,7 @@ class ActivityDataGrid extends DataGrid
 
                 $route = urldecode(route('admin.leads.view', $row->lead_id));
 
-                return "<a class='text-brandColor hover:underline' target='_blank' href='".$route."'>".$row->lead_title.'</a>';
+                return "<a class='text-brandColor hover:underline' target='_blank' href='".$route."'>".decrypt($row->lead_title, false).'</a>';
             },
         ]);
 

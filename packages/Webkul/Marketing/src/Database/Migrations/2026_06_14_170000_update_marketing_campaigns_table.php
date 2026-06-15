@@ -14,7 +14,7 @@ return new class extends Migration
         });
 
         Schema::table('marketing_campaigns', function (Blueprint $table) {
-            if (!Schema::hasColumn('marketing_campaigns', 'mailing_list_id')) {
+            if (! Schema::hasColumn('marketing_campaigns', 'mailing_list_id')) {
                 $table->unsignedInteger('mailing_list_id')->nullable()->after('marketing_event_id');
                 $table->foreign('mailing_list_id')
                     ->references('id')
@@ -24,7 +24,7 @@ return new class extends Migration
         });
 
         Schema::table('marketing_campaigns', function (Blueprint $table) {
-            if (!Schema::hasColumn('marketing_campaigns', 'sent_at')) {
+            if (! Schema::hasColumn('marketing_campaigns', 'sent_at')) {
                 $table->timestamp('sent_at')->nullable()->after('status');
             }
         });

@@ -36,25 +36,38 @@ return [
     ],
 
     /**
-     * Campaigns.
+     * E-Blasts (Campaigns, Mailing Lists, Email Templates).
      */
     [
-        'key' => 'campaigns',
-        'name' => 'admin::app.layouts.campaigns',
+        'key' => 'e-blasts',
+        'name' => 'admin::app.layouts.e-blasts',
         'route' => 'admin.settings.marketing.campaigns.index',
         'sort' => 3,
         'icon-class' => 'icon-sent',
-    ],
-
-    /**
-     * Mailing Lists.
-     */
-    [
-        'key' => 'mailing_lists',
+    ], [
+        'key' => 'e-blasts.campaigns',
+        'name' => 'admin::app.layouts.campaigns',
+        'route' => 'admin.settings.marketing.campaigns.index',
+        'sort' => 1,
+        'icon-class' => '',
+    ], [
+        'key' => 'e-blasts.mailing_lists',
         'name' => 'admin::app.layouts.mailing-lists',
         'route' => 'admin.settings.mailing_lists.index',
+        'sort' => 2,
+        'icon-class' => '',
+    ], [
+        'key' => 'e-blasts.email_templates',
+        'name' => 'admin::app.layouts.email-templates',
+        'route' => 'admin.settings.email_templates.index',
+        'sort' => 3,
+        'icon-class' => '',
+    ], [
+        'key' => 'e-blasts.events',
+        'name' => 'admin::app.layouts.events',
+        'route' => 'admin.settings.marketing.events.index',
         'sort' => 4,
-        'icon-class' => 'icon-list',
+        'icon-class' => '',
     ],
 
     /**
@@ -232,20 +245,6 @@ return [
         'route' => 'admin.settings.attributes.index',
         'sort' => 1,
         'icon-class' => 'icon-attribute',
-    ], [
-        'key' => 'settings.automation.email_templates',
-        'name' => 'admin::app.layouts.email-templates',
-        'info' => 'admin::app.layouts.email-templates-info',
-        'route' => 'admin.settings.email_templates.index',
-        'sort' => 2,
-        'icon-class' => 'icon-settings-mail',
-    ], [
-        'key' => 'settings.automation.events',
-        'name' => 'admin::app.layouts.events',
-        'info' => 'admin::app.layouts.events-info',
-        'route' => 'admin.settings.marketing.events.index',
-        'sort' => 2,
-        'icon-class' => 'icon-calendar',
     ], [
         'key' => 'settings.automation.webhooks',
         'name' => 'admin::app.layouts.webhooks',

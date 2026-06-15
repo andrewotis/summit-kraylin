@@ -69,6 +69,86 @@ class SubscriberController extends Controller
         return view('admin::settings.mailing-lists.subscribers', compact('mailingList'));
     }
 
+    public function bulkStore(int $mailingListId): JsonResponse
+    {
+        $this->validate(request(), [
+            'person_ids' => 'required|array',
+            'person_ids.*' => 'required|integer|exists:persons,id',
+        ]);
+
+        $mailingList = $this->mailingListRepository->findOrFail($mailingListId);
+
+        $personIds = request('person_ids');
+        $existingIds = $this->subscriberRepository->findWhereIn('person_id', $personIds)
+            ->where('mailing_list_id', $mailingList->id)
+            ->pluck('person_id')
+            ->toArray();
+
+        $newIds = array_diff($personIds, $existingIds);
+
+        foreach ($newIds as $personId) {
+            Event::dispatch('settings.subscribers.create.before');
+
+            $this->subscriberRepository->create([
+                'mailing_list_id' => $mailingList->id,
+                'person_id' => $personId,
+                'is_subscribed' => true,
+            ]);
+
+            Event::dispatch('settings.subscribers.create.after');
+        }
+
+        $added = count($newIds);
+        $skipped = count($personIds) - $added;
+
+        $message = $added
+            ? trans_choice('admin::app.settings.mailing-lists.subscribers.bulk-add-success', $added, ['count' => $added])
+            : trans('admin::app.settings.mailing-lists.subscribers.bulk-add-none');
+
+        if ($skipped) {
+            $message .= ' '.trans_choice('admin::app.settings.mailing-lists.subscribers.bulk-add-skipped', $skipped, ['count' => $skipped]);
+        }
+
+        return response()->json([
+            'message' => $message,
+        ]);
+    }
+
+    public function subscribeAll(int $mailingListId): JsonResponse
+    {
+        $mailingList = $this->mailingListRepository->findOrFail($mailingListId);
+
+        $allPersonIds = $this->personRepository->all()->pluck('id')->toArray();
+
+        $existingIds = $this->subscriberRepository->findByField('mailing_list_id', $mailingList->id)
+            ->pluck('person_id')
+            ->toArray();
+
+        $newIds = array_diff($allPersonIds, $existingIds);
+
+        foreach ($newIds as $personId) {
+            Event::dispatch('settings.subscribers.create.before');
+
+            $this->subscriberRepository->create([
+                'mailing_list_id' => $mailingList->id,
+                'person_id' => $personId,
+                'is_subscribed' => true,
+            ]);
+
+            Event::dispatch('settings.subscribers.create.after');
+        }
+
+        $added = count($newIds);
+
+        $message = $added
+            ? trans_choice('admin::app.settings.mailing-lists.subscribers.subscribe-all-success', $added, ['count' => $added])
+            : trans('admin::app.settings.mailing-lists.subscribers.subscribe-all-none');
+
+        return response()->json([
+            'message' => $message,
+        ]);
+    }
+
     public function store(int $mailingListId): JsonResponse
     {
         $this->validate(request(), [

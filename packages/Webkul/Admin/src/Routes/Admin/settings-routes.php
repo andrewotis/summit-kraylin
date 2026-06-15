@@ -374,6 +374,10 @@ Route::prefix('settings')->group(function () {
 
             Route::delete('{subscriberId}', 'destroy')->name('admin.settings.mailing_lists.subscribers.delete');
 
+            Route::post('bulk-create', 'bulkStore')->name('admin.settings.mailing_lists.subscribers.bulk_store');
+
+            Route::post('subscribe-all', 'subscribeAll')->name('admin.settings.mailing_lists.subscribers.subscribe_all');
+
             Route::post('mass-destroy', 'massDestroy')->name('admin.settings.mailing_lists.subscribers.mass_delete');
 
             Route::post('mass-toggle', 'massToggle')->name('admin.settings.mailing_lists.subscribers.mass_toggle');

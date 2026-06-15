@@ -8,8 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasTable('subscribers')) {
+            return;
+        }
+
         Schema::table('subscribers', function (Blueprint $table) {
-            if (!Schema::hasColumn('subscribers', 'person_id')) {
+            if (! Schema::hasColumn('subscribers', 'person_id')) {
                 $table->dropForeign(['mailing_list_id']);
                 $table->dropUnique(['mailing_list_id', 'email']);
 
@@ -27,6 +31,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasTable('subscribers')) {
+            return;
+        }
+
         Schema::table('subscribers', function (Blueprint $table) {
             if (Schema::hasColumn('subscribers', 'person_id')) {
                 $table->dropForeign(['mailing_list_id']);

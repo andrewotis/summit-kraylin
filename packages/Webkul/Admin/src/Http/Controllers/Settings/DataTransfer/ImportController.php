@@ -269,15 +269,6 @@ class ImportController extends Controller
             ], 400);
         }
 
-        if (
-            $import->process_in_queue
-            && config('queue.default') == 'sync'
-        ) {
-            return new JsonResponse([
-                'message' => trans('admin::app.settings.data-transfer.imports.setup-queue-error'),
-            ], 400);
-        }
-
         /**
          * Set the import state to processing
          */

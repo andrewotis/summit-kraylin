@@ -2,10 +2,13 @@
 
 namespace Webkul\DataTransfer\Helpers\Importers\Persons;
 
+use Webkul\Contact\Models\Person;
 use Webkul\Contact\Repositories\PersonRepository;
 
 class Storage
 {
+    const CHUNK_SIZE = 200;
+
     /**
      * Items contains email as key and product information as value.
      */
@@ -38,24 +41,26 @@ class Storage
 
     /**
      * Load the Emails.
+     *
+     * Emails are encrypted in the database, so we must load all records
+     * and match in PHP after Eloquent decrypts them.
      */
     public function load(array $emails = []): void
     {
-        if (empty($emails)) {
-            $persons = $this->personRepository->all($this->selectColumns);
-        } else {
-            $persons = $this->personRepository->scopeQuery(function ($query) use ($emails) {
-                return $query->where(function ($subQuery) use ($emails) {
-                    foreach ($emails as $email) {
-                        $subQuery->orWhereJsonContains('emails', ['value' => $email]);
-                    }
-                });
-            })->all($this->selectColumns);
-        }
+        $emailSet = ! empty($emails) ? array_flip($emails) : null;
 
-        $persons->each(function ($person) {
-            collect($person->emails)
-                ->each(fn ($email) => $this->set($email['value'], $person->id));
+        Person::query()->select($this->selectColumns)->chunk(self::CHUNK_SIZE, function ($persons) use ($emailSet) {
+            foreach ($persons as $person) {
+                $personEmails = collect($person->emails);
+
+                if ($emailSet === null) {
+                    $personEmails->each(fn ($email) => $this->set($email['value'], $person->id));
+                } else {
+                    $personEmails
+                        ->filter(fn ($email) => isset($emailSet[$email['value']]))
+                        ->each(fn ($email) => $this->set($email['value'], $person->id));
+                }
+            }
         });
     }
 
@@ -67,6 +72,24 @@ class Storage
         $this->items[$email] = $id;
 
         return $this;
+    }
+
+    /**
+     * Set all items at once (from cache).
+     */
+    public function setItems(array $items): self
+    {
+        $this->items = $items;
+
+        return $this;
+    }
+
+    /**
+     * Get all items.
+     */
+    public function getItems(): array
+    {
+        return $this->items;
     }
 
     /**

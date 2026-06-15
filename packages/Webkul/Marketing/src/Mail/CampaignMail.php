@@ -6,6 +6,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Vite;
 use Webkul\Attribute\Repositories\AttributeRepository;
 use Webkul\Contact\Contracts\Person;
 use Webkul\Marketing\Contracts\Campaign;
@@ -81,7 +83,25 @@ class CampaignMail extends Mailable
             '{% unsubscribe_url %}' => $unsubscribeUrl,
         ]);
 
+        $logoUrl = $this->logoUrl();
+
+        $content = strtr($content, [
+            '{%logo_url%}' => $logoUrl,
+            '{% logo_url %}' => $logoUrl,
+        ]);
+
         return $content;
+    }
+
+    private function logoUrl(): string
+    {
+        $logo = core()->getConfigData('general.general.admin_logo.logo_image');
+
+        if ($logo) {
+            return Storage::url($logo);
+        }
+
+        return Vite::asset('images/logo.svg');
     }
 
     private function unsubscribeUrl(): string

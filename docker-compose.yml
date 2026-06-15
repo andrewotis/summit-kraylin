@@ -13,6 +13,7 @@ services:
             WWWUSER: ${WWWUSER:-1000}
         volumes:
             - .:/var/www/html
+            - ./docker/php.ini:/usr/local/etc/php/conf.d/upload.ini
 
     nginx:
         image: nginx:alpine

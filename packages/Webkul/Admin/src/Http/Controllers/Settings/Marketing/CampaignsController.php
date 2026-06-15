@@ -42,7 +42,7 @@ class CampaignsController extends Controller
 
     public function getEmailTemplates(): JsonResponse
     {
-        $emailTemplates = $this->emailTemplateRepository->get(['id', 'name']);
+        $emailTemplates = $this->emailTemplateRepository->get(['id', 'name', 'subject']);
 
         return response()->json([
             'data' => $emailTemplates,

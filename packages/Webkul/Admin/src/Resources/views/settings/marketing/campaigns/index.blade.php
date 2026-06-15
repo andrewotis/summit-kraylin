@@ -347,6 +347,8 @@
                                             :label="trans('admin::app.settings.marketing.campaigns.index.create.subject')"
                                         />
 
+                                        <p class="mt-1 text-xs text-gray-400">This will be the email subject line for the e-blast.</p>
+
                                         <x-admin::form.control-group.error control-name="subject" />
                                     </x-admin::form.control-group>
 
@@ -395,11 +397,13 @@
                                             rules="required"
                                             ::value="campaign.marketing_template_id"
                                             :label="trans('admin::app.settings.marketing.campaigns.index.create.email-template')"
+                                            @change="campaign.subject = ($event.target.selectedOptions[0]?.getAttribute('data-subject') || campaign.subject)"
                                         >
                                             <option
                                                 v-for="template in emailTemplates"
                                                 v-text="template.name"
                                                 :value="template.id"
+                                                :data-subject="template.subject"
                                             ></option>
                                         </x-admin::form.control-group.control>
 

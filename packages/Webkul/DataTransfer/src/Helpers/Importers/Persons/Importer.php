@@ -4,10 +4,15 @@ namespace Webkul\DataTransfer\Helpers\Importers\Persons;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
+use Webkul\Activity\Repositories\ActivityRepository;
 use Webkul\Attribute\Repositories\AttributeRepository;
 use Webkul\Attribute\Repositories\AttributeValueRepository;
+use Webkul\Contact\Models\Person;
 use Webkul\Contact\Repositories\PersonRepository;
 use Webkul\DataTransfer\Contracts\ImportBatch as ImportBatchContract;
 use Webkul\DataTransfer\Helpers\Import;
@@ -110,7 +115,18 @@ class Importer extends AbstractImporter
      */
     public function validateData(): void
     {
-        $this->personStorage->init();
+        /**
+         * Clear stale email map cache before re-validation.
+         */
+        $cachePath = "imports/email_map_{$this->import->id}.json";
+
+        if (\Illuminate\Support\Facades\Storage::disk('local')->exists($cachePath)) {
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($cachePath);
+        }
+
+        if ($this->import->action == Import::ACTION_DELETE) {
+            $this->personStorage->init();
+        }
 
         parent::validateData();
     }
@@ -151,14 +167,14 @@ class Importer extends AbstractImporter
          */
         $validator = Validator::make($rowData, [
             ...$this->getValidationRules('persons', $rowData),
-            'organization_id' => 'required|exists:organizations,id',
+            'organization_id' => 'nullable|integer|exists:organizations,id',
             'user_id' => 'required|exists:users,id',
-            'contact_numbers' => 'required|array',
-            'contact_numbers.*.value' => 'required|numeric',
-            'contact_numbers.*.label' => 'required|in:home,work',
+            'contact_numbers' => 'nullable|array',
+            'contact_numbers.*.value' => 'nullable|numeric',
+            'contact_numbers.*.label' => 'nullable|in:home,work',
             'emails' => 'required|array',
             'emails.*.value' => 'required|email',
-            'emails.*.label' => 'required|in:home,work',
+            'emails.*.label' => 'nullable|in:home,work',
         ]);
 
         if ($validator->fails()) {
@@ -284,12 +300,22 @@ class Importer extends AbstractImporter
     }
 
     /**
+     * Cache path for email→ID map between batch requests.
+     */
+    private function emailMapCachePath(): string
+    {
+        return "imports/email_map_{$this->import->id}.json";
+    }
+
+    /**
      * Save person from current batch.
      */
     protected function savePersonData(ImportBatchContract $batch): bool
     {
         /**
          * Load person storage with batch email.
+         * Uses a file-based cache between batch HTTP requests so each
+         * batch doesn't re-scan the entire persons table.
          */
         $emails = collect(Arr::pluck($batch->data, 'emails'))
             ->map(function ($value) {
@@ -298,7 +324,20 @@ class Importer extends AbstractImporter
                 return $normalized[0]['value'] ?? null;
             });
 
-        $this->personStorage->load($emails->toArray());
+        $cachePath = $this->emailMapCachePath();
+
+        if (\Illuminate\Support\Facades\Storage::disk('local')->exists($cachePath)) {
+            $cached = \Illuminate\Support\Facades\Storage::disk('local')->get($cachePath);
+
+            $this->personStorage->setItems(json_decode($cached, true) ?? []);
+        } else {
+            $this->personStorage->load($emails->toArray());
+
+            \Illuminate\Support\Facades\Storage::disk('local')->put(
+                $cachePath,
+                json_encode($this->personStorage->getItems())
+            );
+        }
 
         $persons = [];
 
@@ -330,7 +369,9 @@ class Importer extends AbstractImporter
         $emails = $this->prepareEmail($rowData['emails']);
 
         foreach ($emails as $email) {
-            $rowData['unique_id'] = "{$rowData['user_id']}|{$rowData['organization_id']}|{$email}|{$rowData['contact_numbers'][0]['value'] ?? ''}";
+            $contactValue = ! empty($rowData['contact_numbers']) ? $rowData['contact_numbers'][0]['value'] : '';
+
+            $rowData['unique_id'] = "{$rowData['user_id']}|{$rowData['organization_id']}|{$email}|{$contactValue}";
 
             if ($this->isEmailExist($email)) {
                 $persons['update'][$email] = $rowData;
@@ -349,33 +390,94 @@ class Importer extends AbstractImporter
      */
     public function savePersons(array $persons): void
     {
+        $userId = Auth::check() ? Auth::id() : null;
+
         if (! empty($persons['update'])) {
             $this->updatedItemsCount += count($persons['update']);
+
+            array_walk($persons['update'], fn (&$row) => $this->encryptArrayFields($row));
 
             $this->personRepository->upsert(
                 $persons['update'],
                 $this->masterAttributeCode,
             );
+
+            $this->logActivity(array_keys($persons['update']), 'Updated via CSV import', $userId);
         }
 
         if (! empty($persons['insert'])) {
             $this->createdItemsCount += count($persons['insert']);
 
+            $uniqueIds = array_map(fn ($row) => $row['unique_id'], $persons['insert']);
+
+            array_walk($persons['insert'], fn (&$row) => $this->encryptArrayFields($row));
+
             $this->personRepository->insert($persons['insert']);
 
             /**
-             * Update the sku storage with newly created products
+             * Query only the newly inserted persons by unique_id (not encrypted)
+             * instead of reloading all persons from the database.
              */
-            $emails = array_keys($persons['insert']);
+            $insertedPersons = Person::query()
+                ->select(['id', 'emails'])
+                ->whereIn('unique_id', $uniqueIds)
+                ->get();
 
-            $newPersons = $this->personRepository->where(function ($query) use ($emails) {
-                foreach ($emails as $email) {
-                    $query->orWhereJsonContains('emails', [['value' => $email]]);
-                }
-            })->get();
+            foreach ($insertedPersons as $person) {
+                $decoded = collect($person->emails);
 
-            foreach ($newPersons as $person) {
-                $this->personStorage->set($person->emails[0]['value'], $person->id);
+                $decoded->each(fn ($email) => $this->personStorage->set($email['value'], $person->id));
+            }
+
+            $this->logActivity(array_keys($persons['insert']), 'Created via CSV import', $userId);
+
+            /**
+             * Persist the updated email map to cache for the next batch.
+             */
+            \Illuminate\Support\Facades\Storage::disk('local')->put(
+                $this->emailMapCachePath(),
+                json_encode($this->personStorage->getItems())
+            );
+        }
+    }
+
+    /**
+     * Create a system activity for each person and attach via pivot.
+     */
+    private function logActivity(array $emails, string $title, ?int $userId): void
+    {
+        foreach ($emails as $email) {
+            $personId = $this->personStorage->get($email);
+
+            if (! $personId) {
+                continue;
+            }
+
+            $activity = app(ActivityRepository::class)->create([
+                'type' => 'system',
+                'title' => $title,
+                'is_done' => 1,
+                'user_id' => $userId,
+            ]);
+
+            DB::table('person_activities')->insert([
+                'activity_id' => $activity->id,
+                'person_id' => $personId,
+            ]);
+        }
+    }
+
+    /**
+     * Encrypt array fields (emails, contact_numbers) for direct DB insertion,
+     * bypassing Eloquent casts that don't apply with query builder insert()/upsert().
+     */
+    private function encryptArrayFields(array &$row): void
+    {
+        foreach (['name', 'emails', 'contact_numbers'] as $field) {
+            if (isset($row[$field])) {
+                $row[$field] = is_array($row[$field])
+                    ? Crypt::encryptString(json_encode($row[$field]))
+                    : Crypt::encryptString($row[$field]);
             }
         }
     }
@@ -397,6 +499,14 @@ class Importer extends AbstractImporter
                 ]));
 
                 $attribute['entity_type'] = 'persons';
+
+                foreach (['text_value', 'json_value'] as $field) {
+                    if (isset($attribute[$field]) && is_array($attribute[$field])) {
+                        $attribute[$field] = Crypt::encryptString(json_encode($attribute[$field]));
+                    } elseif (isset($attribute[$field]) && $field === 'text_value') {
+                        $attribute[$field] = Crypt::encryptString($attribute[$field]);
+                    }
+                }
 
                 $personAttributeValues[$attribute['unique_id']] = $attribute;
             }

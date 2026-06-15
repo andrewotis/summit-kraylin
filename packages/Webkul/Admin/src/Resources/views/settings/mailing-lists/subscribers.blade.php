@@ -30,6 +30,22 @@
                         >
                             @lang('admin::app.settings.mailing-lists.subscribers.create-btn')
                         </button>
+
+                        <button
+                            type="button"
+                            class="transparent-button"
+                            @click="$refs.subscriberSettings.openBulkModal()"
+                        >
+                            @lang('admin::app.settings.mailing-lists.subscribers.bulk-add-btn')
+                        </button>
+
+                        <button
+                            type="button"
+                            class="transparent-button"
+                            @click="$refs.subscriberSettings.subscribeAll()"
+                        >
+                            @lang('admin::app.settings.mailing-lists.subscribers.subscribe-all-btn')
+                        </button>
                     @endif
 
                     {!! view_render_event('admin.settings.mailing_lists.subscribers.index.create_button.after') !!}
@@ -39,7 +55,7 @@
 
         <v-subscriber-settings
             ref="subscriberSettings"
-            :search-url="'{{ route('admin.contacts.persons.search') }}'"
+            :search-url="'{{ route('admin.contacts.persons.search', ['exclude_subscribers_of' => $mailingList->id]) }}'"
         >
             <x-admin::shimmer.datagrid />
         </v-subscriber-settings>
@@ -51,6 +67,13 @@
             id="subscriber-settings-template"
         >
             {!! view_render_event('admin.settings.mailing_lists.subscribers.index.datagrid.before') !!}
+
+            <span class="mb-2 flex cursor-pointer items-center gap-x-2 text-sm text-gray-600 dark:text-gray-300" @click="toggleUnsubscribed">
+                <span
+                    :class="['rounded-md text-2xl', showUnsubscribed ? 'icon-checkbox-select text-brandColor' : 'icon-checkbox-outline text-gray-500']"
+                ></span>
+                Show unsubscribed
+            </span>
 
             <x-admin::datagrid
                 :src="route('admin.settings.mailing_lists.subscribers.index', $mailingList->id)"
@@ -74,6 +97,21 @@
                             class="row grid items-center gap-2.5 border-b px-4 py-4 text-gray-600 transition-all hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-950 max-lg:hidden"
                             :style="`grid-template-columns: repeat(${gridsCount}, minmax(0, 1fr))`"
                         >
+                            <p v-if="available.massActions.length">
+                                <label :for="`mass_action_select_record_${record[available.meta.primary_column]}`">
+                                    <input
+                                        type="checkbox"
+                                        :name="`mass_action_select_record_${record[available.meta.primary_column]}`"
+                                        :value="record[available.meta.primary_column]"
+                                        :id="`mass_action_select_record_${record[available.meta.primary_column]}`"
+                                        class="peer hidden"
+                                        v-model="applied.massActions.indices"
+                                    >
+                                    <span class="icon-checkbox-outline peer-checked:icon-checkbox-select cursor-pointer rounded-md text-2xl text-gray-500 peer-checked:text-brandColor">
+                                    </span>
+                                </label>
+                            </p>
+
                             <p>@{{ record.id }}</p>
 
                             <p>@{{ record.person_name }}</p>
@@ -253,6 +291,70 @@
             </x-admin::form>
 
             {!! view_render_event('admin.settings.mailing_lists.subscribers.index.form.after') !!}
+
+            {!! view_render_event('admin.settings.mailing_lists.subscribers.index.bulk_form.before') !!}
+
+            <x-admin::form
+                v-slot="{ meta, errors, handleSubmit }"
+                as="div"
+                ref="bulkModalForm"
+            >
+                <form @submit="handleSubmit($event, bulkAdd)">
+                    <x-admin::modal ref="bulkAddModal">
+                        <x-slot:header>
+                            <p class="text-lg font-bold text-gray-800 dark:text-white">
+                                @lang('admin::app.settings.mailing-lists.subscribers.bulk-add-title')
+                            </p>
+                        </x-slot>
+
+                        <x-slot:content>
+                            <x-admin::form.control-group>
+                                <x-admin::form.control-group.label>
+                                    @lang('admin::app.settings.mailing-lists.subscribers.bulk-add-search')
+                                </x-admin::form.control-group.label>
+
+                                <x-admin::lookup
+                                    ::src="searchUrl"
+                                    name="person_search_id"
+                                    ::value="null"
+                                    :label="trans('admin::app.settings.mailing-lists.subscribers.create.contact')"
+                                    :placeholder="trans('admin::app.settings.mailing-lists.subscribers.create.contact')"
+                                    @on-selected="addPerson"
+                                />
+                            </x-admin::form.control-group>
+
+                            <div v-if="selectedPeople.length" class="mt-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <div
+                                    v-for="(person, index) in selectedPeople"
+                                    class="flex items-center justify-between border-b border-gray-100 px-3 py-2 last:border-b-0 dark:border-gray-700"
+                                >
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">@{{ person.name }}</span>
+                                    <span
+                                        class="icon-delete cursor-pointer rounded p-1 text-lg text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-800"
+                                        @click="removePerson(index)"
+                                    >
+                                    </span>
+                                </div>
+                                <div class="px-3 py-2 text-xs text-gray-400">
+                                    @{{ selectedPeople.length }} @lang('admin::app.settings.mailing-lists.subscribers.bulk-add-selected')
+                                </div>
+                            </div>
+                        </x-slot>
+
+                        <x-slot:footer>
+                            <x-admin::button
+                                button-type="submit"
+                                class="primary-button justify-center"
+                                title="Add Selected People"
+                                ::loading="isBulkProcessing"
+                                ::disabled="isBulkProcessing || !selectedPeople.length"
+                            />
+                        </x-slot>
+                    </x-admin::modal>
+                </form>
+            </x-admin::form>
+
+            {!! view_render_event('admin.settings.mailing_lists.subscribers.index.bulk_form.after') !!}
         </script>
 
         <script type="module">
@@ -261,15 +363,21 @@
 
                 props: ['searchUrl'],
 
-                data() {
-                    return {
-                        isProcessing: false,
+                    data() {
+                        return {
+                            isProcessing: false,
 
-                        selectedSubscriber: false,
+                            isBulkProcessing: false,
 
-                        selectedPerson: null,
-                    };
-                },
+                            selectedSubscriber: false,
+
+                            selectedPerson: null,
+
+                            selectedPeople: [],
+
+                            showUnsubscribed: false,
+                        };
+                    },
 
                 computed: {
                     gridsCount() {
@@ -294,6 +402,18 @@
                         this.selectedPerson = null;
 
                         this.$refs.subscriberUpdateAndCreateModal.toggle();
+                    },
+
+                    toggleUnsubscribed() {
+                        this.showUnsubscribed = !this.showUnsubscribed;
+
+                        let params = {};
+
+                        if (this.showUnsubscribed) {
+                            params.show_unsubscribed = 1;
+                        }
+
+                        this.$refs.datagrid.get(params);
                     },
 
                     onPersonSelected(person) {
@@ -332,6 +452,74 @@
                             if (error.response.status === 422) {
                                 setErrors(error.response.data.errors);
                             }
+                        });
+                    },
+
+                    openBulkModal() {
+                        this.selectedPeople = [];
+
+                        this.$refs.bulkAddModal.toggle();
+                    },
+
+                    addPerson(person) {
+                        if (!this.selectedPeople.some(p => p.id === person.id)) {
+                            this.selectedPeople.push(person);
+                        }
+                    },
+
+                    removePerson(index) {
+                        this.selectedPeople.splice(index, 1);
+                    },
+
+                    bulkAdd(params, {resetForm}) {
+                        this.isBulkProcessing = true;
+
+                        this.$axios.post("{{ route('admin.settings.mailing_lists.subscribers.bulk_store', $mailingList->id) }}", {
+                            person_ids: this.selectedPeople.map(p => p.id),
+                        }, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            }
+                        }).then(response => {
+                            this.isBulkProcessing = false;
+
+                            this.$refs.bulkAddModal.toggle();
+
+                            this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+
+                            this.$refs.datagrid.get();
+
+                            resetForm();
+
+                            this.selectedPeople = [];
+                        }).catch(error => {
+                            this.isBulkProcessing = false;
+
+                            if (error.response.status === 422) {
+                                this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message });
+                            }
+                        });
+                    },
+
+                    subscribeAll() {
+                        if (!confirm('Are you sure you want to add all contacts to this mailing list?')) {
+                            return;
+                        }
+
+                        this.isBulkProcessing = true;
+
+                        this.$axios.post("{{ route('admin.settings.mailing_lists.subscribers.subscribe_all', $mailingList->id) }}", {}, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            }
+                        }).then(response => {
+                            this.isBulkProcessing = false;
+
+                            this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+
+                            this.$refs.datagrid.get();
+                        }).catch(error => {
+                            this.isBulkProcessing = false;
                         });
                     },
 

@@ -375,6 +375,15 @@ class Import
 
         $this->setImport($import);
 
+        /**
+         * Clean up email map cache.
+         */
+        $cachePath = "imports/email_map_{$this->import->id}.json";
+
+        if (Storage::disk('local')->exists($cachePath)) {
+            Storage::disk('local')->delete($cachePath);
+        }
+
         Event::dispatch('data_transfer.imports.completed', $import);
     }
 

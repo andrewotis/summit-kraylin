@@ -72,6 +72,18 @@
                             class="row grid items-center gap-2.5 border-b px-4 py-4 text-gray-600 transition-all hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-950 max-lg:hidden"
                             :style="`grid-template-columns: repeat(${gridsCount}, minmax(0, 1fr))`"
                         >
+                            <p v-if="available.massActions.length">
+                                <label :for="`mass_action_select_record_${record[available.meta.primary_column]}`">
+                                    <input
+                                        type="checkbox"
+                                        :name="`mass_action_select_record_${record[available.meta.primary_column]}`"
+                                        :value="record[available.meta.primary_column]"
+                                        :id="`mass_action_select_record_${record[available.meta.primary_column]}`"
+                                        v-model="applied.massActions.indices"
+                                    />
+                                </label>
+                            </p>
+
                             <p>@{{ record.id }}</p>
 
                             <p>@{{ record.name }}</p>

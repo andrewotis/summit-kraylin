@@ -8,9 +8,21 @@ Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail) {
     $trail->push(trans('admin::app.layouts.dashboard'), route('admin.dashboard.index'));
 });
 
-// Dashboard > Leads
-Breadcrumbs::for('leads', function (BreadcrumbTrail $trail) {
+// Dashboard > Sales
+Breadcrumbs::for('sales', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
+    $trail->push(trans('admin::app.layouts.sales'), route('admin.leads.index'));
+});
+
+// Dashboard > E-Blasts
+Breadcrumbs::for('e-blasts', function (BreadcrumbTrail $trail) {
+    $trail->parent('dashboard');
+    $trail->push(trans('admin::app.layouts.e-blasts'), route('admin.settings.marketing.campaigns.index'));
+});
+
+// Dashboard > Sales > Leads
+Breadcrumbs::for('leads', function (BreadcrumbTrail $trail) {
+    $trail->parent('sales');
     $trail->push(trans('admin::app.layouts.leads'), route('admin.leads.index'));
 });
 
@@ -32,9 +44,9 @@ Breadcrumbs::for('leads.view', function (BreadcrumbTrail $trail, $lead) {
     $trail->push('#'.$lead->id, route('admin.leads.view', $lead->id));
 });
 
-// Dashboard > Quotes
+// Dashboard > Sales > Quotes
 Breadcrumbs::for('quotes', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
+    $trail->parent('sales');
     $trail->push(trans('admin::app.layouts.quotes'), route('admin.quotes.index'));
 });
 

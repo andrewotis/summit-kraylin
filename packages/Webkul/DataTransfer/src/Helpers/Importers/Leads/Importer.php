@@ -221,7 +221,15 @@ class Importer extends AbstractImporter
         $rules = [];
 
         foreach (explode('|', $entityTypes) as $entityType) {
-            $attributes = $this->attributeRepository->scopeQuery(fn ($query) => $query->whereIn('code', array_keys($rowData))->where('entity_type', $entityType))->get();
+            $cacheKey = $entityType.'|'.implode(',', array_keys($rowData));
+
+            if (! isset($this->attributeCache[$cacheKey])) {
+                $this->attributeCache[$cacheKey] = $this->attributeRepository
+                    ->scopeQuery(fn ($query) => $query->whereIn('code', array_keys($rowData))->where('entity_type', $entityType))
+                    ->get();
+            }
+
+            $attributes = $this->attributeCache[$cacheKey];
 
             foreach ($attributes as $attribute) {
                 if ($entityType == 'persons') {

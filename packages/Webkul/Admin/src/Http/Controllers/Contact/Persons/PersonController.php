@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\View\View;
 use Webkul\Admin\DataGrids\Contact\PersonDataGrid;
@@ -162,6 +163,17 @@ class PersonController extends Controller
 
                 return false;
             })->values();
+        }
+
+        $excludeSubscribersOf = request()->integer('exclude_subscribers_of');
+
+        if ($excludeSubscribersOf) {
+            $subscribedPersonIds = DB::table('subscribers')
+                ->where('mailing_list_id', $excludeSubscribersOf)
+                ->pluck('person_id')
+                ->toArray();
+
+            $persons = $persons->reject(fn ($person) => in_array($person->id, $subscribedPersonIds))->values();
         }
 
         $limit = request()->integer('limit', 0);

@@ -9,12 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'google2fa_secret')) {
+            if (! Schema::hasColumn('users', 'google2fa_secret')) {
                 $table->text('google2fa_secret')->nullable();
                 $table->text('two_factor_recovery_codes')->nullable();
                 $table->timestamp('two_factor_confirmed_at')->nullable();
             }
-            if (!Schema::hasColumn('users', 'emergency_token')) {
+            if (! Schema::hasColumn('users', 'emergency_token')) {
                 $table->string('emergency_token')->nullable()->after('two_factor_confirmed_at');
                 $table->timestamp('emergency_token_expires_at')->nullable()->after('emergency_token');
                 $table->unsignedInteger('emergency_granted_by')->nullable()->after('emergency_token_expires_at');

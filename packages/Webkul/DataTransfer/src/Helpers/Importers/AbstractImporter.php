@@ -112,6 +112,12 @@ abstract class AbstractImporter
     protected array $validatedRows = [];
 
     /**
+     * Cached attribute lookups per entity type + columns combination,
+     * avoids querying the DB on every single row during validation.
+     */
+    protected array $attributeCache = [];
+
+    /**
      * Number of rows processed by validation.
      */
     protected int $processedRowsCount = 0;
@@ -316,7 +322,15 @@ abstract class AbstractImporter
 
         $rules = [];
 
-        $attributes = $this->attributeRepository->scopeQuery(fn ($query) => $query->whereIn('code', array_keys($rowData))->where('entity_type', $entityType))->get();
+        $cacheKey = $entityType.'|'.implode(',', array_keys($rowData));
+
+        if (! isset($this->attributeCache[$cacheKey])) {
+            $this->attributeCache[$cacheKey] = $this->attributeRepository
+                ->scopeQuery(fn ($query) => $query->whereIn('code', array_keys($rowData))->where('entity_type', $entityType))
+                ->get();
+        }
+
+        $attributes = $this->attributeCache[$cacheKey];
 
         foreach ($attributes as $attribute) {
             $validations = [];

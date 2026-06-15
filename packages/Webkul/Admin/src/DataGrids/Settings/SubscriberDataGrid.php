@@ -25,6 +25,10 @@ class SubscriberDataGrid extends DataGrid
             )
             ->where('subscribers.mailing_list_id', $mailingListId);
 
+        if (! request()->boolean('show_unsubscribed')) {
+            $queryBuilder->where('subscribers.is_subscribed', true);
+        }
+
         $this->addFilter('id', 'subscribers.id');
 
         return $queryBuilder;
@@ -45,8 +49,8 @@ class SubscriberDataGrid extends DataGrid
             'index' => 'person_name',
             'label' => trans('admin::app.settings.mailing-lists.subscribers.datagrid.name'),
             'type' => 'string',
-            'searchable' => true,
-            'filterable' => true,
+            'searchable' => false,
+            'filterable' => false,
             'sortable' => true,
             'closure' => fn ($row) => decrypt($row->person_name, false),
         ]);
@@ -55,8 +59,8 @@ class SubscriberDataGrid extends DataGrid
             'index' => 'person_emails',
             'label' => trans('admin::app.settings.mailing-lists.subscribers.datagrid.email'),
             'type' => 'string',
-            'searchable' => true,
-            'filterable' => true,
+            'searchable' => false,
+            'filterable' => false,
             'sortable' => true,
             'closure' => function ($row) {
                 $decrypted = $row->person_emails ? decrypt($row->person_emails, false) : '';
